@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80" fill="none">
+  <!-- Tooth Clinic Emblem -->
+  <g transform="translate(10, 10)">
+    <defs>
+      <linearGradient id="toothGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#12A4DB" />
+        <stop offset="100%" stop-color="#0B2A7A" />
+      </linearGradient>
+      <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#F4F8FF" stop-opacity="0.9" />
+        <stop offset="100%" stop-color="#12A4DB" stop-opacity="0.3" />
+      </linearGradient>
+    </defs>
+    <!-- Crest Ring -->
+    <circle cx="30" cy="30" r="28" stroke="url(#toothGrad)" stroke-width="2" fill="none" opacity="0.4" stroke-dasharray="4 2"/>
+    <circle cx="30" cy="30" r="24" fill="#06163F" fill-opacity="0.08"/>
+    <!-- Sculpted Tooth Silhouette -->
+    <path d="M22 17C20 17 17 19 17 24C17 29 20 37 23 44C24 46 26 47 28 45C30 43 31 38 31 33C31 38 32 43 34 45C36 47 38 46 39 44C42 37 45 29 45 24C45 19 42 17 40 17C37 17 34 20 31 22C28 20 25 17 22 17Z"
+          fill="url(#toothGrad)" />
+    <!-- Light Specular Flare -->
+    <path d="M22 20C21 21 20 24 20 27C21 26 23 23 25 21C24 20.3 23 20 22 20Z" fill="#FFFFFF" opacity="0.6"/>
+    <!-- Sparkle -->
+    <circle cx="43" cy="18" r="2" fill="#12A4DB"/>
+  </g>
+  
+  <!-- Typography -->
+  <text x="82" y="38" font-family="'Newsreader', 'Playfair Display', 'Cormorant Garamond', Georgia, serif" font-size="28" font-weight="600" letter-spacing="0.04em" fill="currentColor">
+    Aarogya
+  </text>
+  <text x="84" y="54" font-family="'Inter', 'Plus Jakarta Sans', system-ui, sans-serif" font-size="9.5" font-weight="700" letter-spacing="0.28em" fill="#12A4DB">
+    ADVANCED DENTAL CLINIC
+  </text>
+</svg>
