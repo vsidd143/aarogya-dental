@@ -185,10 +185,6 @@ export default function SignatureSection() {
 
       {/* Giant Centred Headline */}
       <div className="relative z-10 max-w-5xl mx-auto text-center px-4">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono uppercase tracking-[0.25em] mb-8">
-          AAROGYA ESSENCE
-        </div>
-
         <h2
           ref={textRef}
           className="font-serif text-4xl sm:text-7xl lg:text-8xl text-white font-medium tracking-tight leading-[1.08] drop-shadow-[0_10px_40px_rgba(0,0,0,0.7)]"

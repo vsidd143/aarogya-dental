@@ -6,7 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Placeholder from "@/components/ui/Placeholder";
 import { siteContent } from "@/data/content";
-import { ArrowRight, Users } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function TeamSection() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,11 +73,6 @@ export default function TeamSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Tag & Main Line */}
         <div className="max-w-3xl mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 text-xs font-mono uppercase tracking-[0.25em] mb-6">
-            <Users className="w-3.5 h-3.5 text-cyan-300" />
-            FACULTY & CLINICAL MASTERY
-          </div>
-
           <h2 className="font-serif text-4xl sm:text-6xl text-white font-medium tracking-tight leading-[1.08] mb-6">
             Our team is <em>dedicated</em> to providing exceptional results.
           </h2>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -9,9 +9,24 @@ import { siteContent } from "@/data/content";
 import { ArrowRight } from "lucide-react";
 
 export default function ServicesSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const counterRef = useRef<HTMLSpanElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+
+  // Left Side Image Card Refs
+  const slide1Ref = useRef<HTMLDivElement>(null);
+  const slide2Ref = useRef<HTMLDivElement>(null);
+  const slide3Ref = useRef<HTMLDivElement>(null);
+
+  const innerImg1Ref = useRef<HTMLDivElement>(null);
+  const innerImg2Ref = useRef<HTMLDivElement>(null);
+  const innerImg3Ref = useRef<HTMLDivElement>(null);
+
+  // Right Side Content Refs
+  const right1Ref = useRef<HTMLDivElement>(null);
+  const right2Ref = useRef<HTMLDivElement>(null);
+  const right3Ref = useRef<HTMLDivElement>(null);
 
   const services = siteContent.services;
 
@@ -19,69 +34,239 @@ export default function ServicesSection() {
     gsap.registerPlugin(ScrollTrigger);
 
     const isMobile = window.innerWidth < 1024;
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
     if (isMobile || prefersReducedMotion) {
       return;
     }
 
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: containerRef.current,
-        pin: pinRef.current,
-        start: "top top",
-        end: "+=2200",
-        scrub: 0.5,
-        onUpdate: (self) => {
-          const p = self.progress;
-          if (p < 0.33) {
-            setActiveSlideIndex(0);
-          } else if (p < 0.67) {
-            setActiveSlideIndex(1);
-          } else {
-            setActiveSlideIndex(2);
-          }
+      // Set initial positions via GSAP (avoids React re-render style clashes)
+      gsap.set(slide2Ref.current, { yPercent: 100 });
+      gsap.set(slide3Ref.current, { yPercent: 100 });
+
+      gsap.set(innerImg2Ref.current, { scale: 1.15 });
+      gsap.set(innerImg3Ref.current, { scale: 1.15 });
+
+      gsap.set(right2Ref.current, { opacity: 0, y: 35, pointerEvents: "none" });
+      gsap.set(right3Ref.current, { opacity: 0, y: 35, pointerEvents: "none" });
+
+      // Master scrubbed timeline for smooth scrolling & continuous image transitions
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: pinRef.current,
+          pin: true,
+          start: "top top",
+          end: "+=2800",
+          scrub: 1, // 1s smooth inertia tracking
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const p = self.progress;
+
+            // Update top counter number smoothly
+            if (counterRef.current) {
+              const num = p < 0.4 ? "01" : p < 0.75 ? "02" : "03";
+              if (counterRef.current.innerText !== num) {
+                counterRef.current.innerText = num;
+              }
+            }
+
+            // Fill top progress bar smoothly based on scroll
+            if (progressBarRef.current) {
+              const pct = (p * 0.67 + 0.33) * 100;
+              progressBarRef.current.style.width = `${Math.min(
+                100,
+                Math.max(33, pct)
+              )}%`;
+            }
+          },
         },
       });
+
+      // =========================================================================
+      // SCENE 1: Hold on Slide 1 (Esthetic Dentistry)
+      // =========================================================================
+      tl.to({}, { duration: 0.7 });
+
+      // =========================================================================
+      // TRANSITION 1 -> 2 (Slide 1 -> Slide 2)
+      // =========================================================================
+      // Left: Slide 2 smoothly slides up like an editorial card
+      tl.to(
+        slide2Ref.current,
+        {
+          yPercent: 0,
+          ease: "power1.inOut",
+          duration: 0.9,
+        },
+        0.7
+      );
+
+      // Inner image parallax zoom settle
+      tl.to(
+        innerImg2Ref.current,
+        {
+          scale: 1.0,
+          ease: "power1.out",
+          duration: 0.9,
+        },
+        0.7
+      );
+
+      // Slide 1 scales back and dims
+      tl.to(
+        innerImg1Ref.current,
+        {
+          scale: 0.92,
+          filter: "brightness(0.35)",
+          ease: "power1.inOut",
+          duration: 0.9,
+        },
+        0.7
+      );
+
+      // Right: Content 1 slides up and fades out
+      tl.to(
+        right1Ref.current,
+        {
+          opacity: 0,
+          y: -35,
+          pointerEvents: "none",
+          ease: "power1.inOut",
+          duration: 0.6,
+        },
+        0.7
+      );
+
+      // Right: Content 2 slides in from bottom and fades in
+      tl.to(
+        right2Ref.current,
+        {
+          opacity: 1,
+          y: 0,
+          pointerEvents: "auto",
+          ease: "power1.out",
+          duration: 0.7,
+        },
+        0.9
+      );
+
+      // =========================================================================
+      // SCENE 2: Hold on Slide 2 (Restorative Dentistry)
+      // =========================================================================
+      tl.to({}, { duration: 0.7 });
+
+      // =========================================================================
+      // TRANSITION 2 -> 3 (Slide 2 -> Slide 3)
+      // =========================================================================
+      // Left: Slide 3 smoothly slides up
+      tl.to(
+        slide3Ref.current,
+        {
+          yPercent: 0,
+          ease: "power1.inOut",
+          duration: 0.9,
+        },
+        2.3
+      );
+
+      // Inner image parallax zoom settle
+      tl.to(
+        innerImg3Ref.current,
+        {
+          scale: 1.0,
+          ease: "power1.out",
+          duration: 0.9,
+        },
+        2.3
+      );
+
+      // Slide 2 scales back and dims
+      tl.to(
+        innerImg2Ref.current,
+        {
+          scale: 0.92,
+          filter: "brightness(0.35)",
+          ease: "power1.inOut",
+          duration: 0.9,
+        },
+        2.3
+      );
+
+      // Right: Content 2 slides up and fades out
+      tl.to(
+        right2Ref.current,
+        {
+          opacity: 0,
+          y: -35,
+          pointerEvents: "none",
+          ease: "power1.inOut",
+          duration: 0.6,
+        },
+        2.3
+      );
+
+      // Right: Content 3 slides in from bottom and fades in
+      tl.to(
+        right3Ref.current,
+        {
+          opacity: 1,
+          y: 0,
+          pointerEvents: "auto",
+          ease: "power1.out",
+          duration: 0.7,
+        },
+        2.5
+      );
+
+      // =========================================================================
+      // SCENE 3: Hold on Slide 3 (Beyond the Smile) before unpinning
+      // =========================================================================
+      tl.to({}, { duration: 0.6 });
     }, containerRef);
 
-    return () => ctx.revert();
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 250);
+
+    return () => {
+      clearTimeout(timer);
+      ctx.revert();
+    };
   }, []);
 
   return (
     <section
       ref={containerRef}
       data-section-theme="midnight"
-      className="relative bg-[#06163F] text-white z-20 overflow-hidden"
+      className="relative bg-[#06163F] text-white z-20"
     >
-      {/* Pinned Desktop Viewport (100vh) */}
+      {/* Viewport: Natural Flow on Mobile, Pinned on Desktop (100vh) */}
       <div
         ref={pinRef}
-        className="relative w-full min-h-screen lg:h-screen overflow-hidden flex flex-col justify-between p-6 sm:p-12 lg:p-16 bg-[#06163F] z-20"
+        className="relative w-full h-auto lg:h-screen lg:overflow-hidden min-h-screen flex flex-col justify-between p-6 sm:p-12 lg:p-16 bg-[#06163F] z-20"
       >
-        {/* Top Bar: Label & Slide Counter + Thin Progress Bar */}
-        <div className="relative z-30 flex items-center justify-between pb-6 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping inline-block" />
-            <span className="text-xs font-mono uppercase tracking-[0.25em] text-cyan-300">
-              CLINICAL DISCIPLINES
-            </span>
-          </div>
-
+        {/* Top Bar: Slide Counter + Thin Progress Bar */}
+        <div className="relative z-30 flex items-center justify-end pb-6 border-b border-white/10">
           <div className="flex items-center gap-4">
             <div className="text-xs font-mono tracking-widest text-white/70">
-              <span className="text-cyan-400 font-bold text-sm">
-                0{activeSlideIndex + 1}
+              <span
+                ref={counterRef}
+                className="text-cyan-400 font-bold text-sm"
+              >
+                01
               </span>{" "}
               / 0{services.length}
             </div>
             {/* Thin Progress Bar */}
-            <div className="w-24 sm:w-36 h-[2px] bg-white/20 rounded-full overflow-hidden">
+            <div className="w-24 sm:w-36 h-[2.5px] bg-white/20 rounded-full overflow-hidden">
               <div
-                className="h-full bg-cyan-400 transition-all duration-300"
-                style={{
-                  width: `${((activeSlideIndex + 1) / services.length) * 100}%`,
-                }}
+                ref={progressBarRef}
+                className="h-full bg-cyan-400 rounded-full"
+                style={{ width: "33%" }}
               />
             </div>
           </div>
@@ -89,111 +274,290 @@ export default function ServicesSection() {
 
         {/* Desktop Slides View */}
         <div className="relative flex-1 my-auto hidden lg:grid grid-cols-12 gap-12 items-center z-20">
-          {/* Left / Center: Large Portrait Image (slightly desaturated with navy overlay) */}
+          {/* ========================================================================= */}
+          {/* LEFT 6 COLS: Image Card Stack with Parallax Smooth Slide Reveal           */}
+          {/* ========================================================================= */}
           <div className="col-span-6 relative h-[65vh] rounded-3xl overflow-hidden border border-cyan-400/20 shadow-2xl bg-slate-950">
-            {services.map((svc, idx) => {
-              const isActive = idx === activeSlideIndex;
-              const isPast = idx < activeSlideIndex;
-              return (
-                <div
-                  key={svc.id}
-                  className={`absolute inset-0 w-full h-full transform transition-all duration-700 ease-out ${
-                    isActive
-                      ? "opacity-100 scale-100 z-10 translate-y-0"
-                      : isPast
-                      ? "opacity-0 scale-95 z-0 -translate-y-4 pointer-events-none"
-                      : "opacity-0 scale-105 z-0 translate-y-6 pointer-events-none"
-                  }`}
-                  style={{
-                    clipPath: isActive ? "inset(0% 0% 0% 0%)" : "inset(100% 0% 0% 0%)",
-                    transition:
-                      "clip-path 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-out, transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)",
-                  }}
-                >
-                  <Placeholder
-                    name={svc.image}
-                    ratio="4/5"
-                    className="w-full h-full filter saturate-[0.85]"
-                  />
-                  {/* Navy & Cyan overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#06163F] via-[#0B2A7A]/30 to-transparent pointer-events-none" />
+            {/* Slide 1: Esthetic Dentistry */}
+            <div
+              ref={slide1Ref}
+              className="absolute inset-0 w-full h-full z-10 overflow-hidden will-change-transform"
+            >
+              <div
+                ref={innerImg1Ref}
+                className="w-full h-full will-change-[transform,filter]"
+              >
+                <Placeholder
+                  name={services[0].image}
+                  ratio="4/5"
+                  priority
+                  className="w-full h-full object-cover filter saturate-[0.88]"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06163F] via-[#0B2A7A]/30 to-transparent pointer-events-none" />
 
-                  {/* Giant White Italic Serif Title Bottom-Left */}
-                  <div className="absolute bottom-8 left-8 right-8 z-20">
-                    <span className="text-[11px] font-mono tracking-widest uppercase text-cyan-300 block mb-2">
-                      0{idx + 1} · {svc.subtitle}
-                    </span>
-                    <h3 className="font-serif italic text-5xl xl:text-6xl text-white font-normal tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
-                      {svc.title}
-                    </h3>
-                  </div>
-                </div>
-              );
-            })}
+              <div className="absolute bottom-8 left-8 right-8 z-20">
+                <span className="text-[11px] font-mono tracking-widest uppercase text-cyan-300 block mb-2">
+                  01 · {services[0].subtitle}
+                </span>
+                <h3 className="font-serif italic text-4xl sm:text-5xl xl:text-6xl text-white font-normal tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
+                  {services[0].title}
+                </h3>
+              </div>
+            </div>
+
+            {/* Slide 2: Restorative Dentistry */}
+            <div
+              ref={slide2Ref}
+              className="absolute inset-0 w-full h-full z-20 overflow-hidden shadow-[-10px_-10px_40px_rgba(0,0,0,0.6)] will-change-transform"
+            >
+              {/* Cyan Accent Top Border Line */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_12px_#22d3ee] z-30 pointer-events-none" />
+
+              <div
+                ref={innerImg2Ref}
+                className="w-full h-full will-change-[transform,filter]"
+              >
+                <Placeholder
+                  name={services[1].image}
+                  ratio="4/5"
+                  priority
+                  className="w-full h-full object-cover filter saturate-[0.88]"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06163F] via-[#0B2A7A]/30 to-transparent pointer-events-none" />
+
+              <div className="absolute bottom-8 left-8 right-8 z-20">
+                <span className="text-[11px] font-mono tracking-widest uppercase text-cyan-300 block mb-2">
+                  02 · {services[1].subtitle}
+                </span>
+                <h3 className="font-serif italic text-4xl sm:text-5xl xl:text-6xl text-white font-normal tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
+                  {services[1].title}
+                </h3>
+              </div>
+            </div>
+
+            {/* Slide 3: Beyond the Smile */}
+            <div
+              ref={slide3Ref}
+              className="absolute inset-0 w-full h-full z-30 overflow-hidden shadow-[-10px_-10px_40px_rgba(0,0,0,0.6)] will-change-transform"
+            >
+              {/* Cyan Accent Top Border Line */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_12px_#22d3ee] z-30 pointer-events-none" />
+
+              <div
+                ref={innerImg3Ref}
+                className="w-full h-full will-change-[transform,filter]"
+              >
+                <Placeholder
+                  name={services[2].image}
+                  ratio="4/5"
+                  priority
+                  className="w-full h-full object-cover filter saturate-[0.88]"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06163F] via-[#0B2A7A]/30 to-transparent pointer-events-none" />
+
+              <div className="absolute bottom-8 left-8 right-8 z-20">
+                <span className="text-[11px] font-mono tracking-widest uppercase text-cyan-300 block mb-2">
+                  03 · {services[2].subtitle}
+                </span>
+                <h3 className="font-serif italic text-4xl sm:text-5xl xl:text-6xl text-white font-normal tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
+                  {services[2].title}
+                </h3>
+              </div>
+            </div>
           </div>
 
-          {/* Right Side: Solutions info & 4 sub-services with arrows */}
-          <div className="col-span-6 pl-4 flex flex-col justify-center">
-            {services.map((svc, idx) => {
-              if (idx !== activeSlideIndex) return null;
-              return (
-                <div key={svc.id} className="service-right space-y-6 animate-in fade-in duration-500">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase">
-                    OUR SOLUTIONS
-                  </div>
+          {/* ========================================================================= */}
+          {/* RIGHT 6 COLS: Solutions Info & Sub-Services (GPU-Accelerated Smooth Stack)*/}
+          {/* ========================================================================= */}
+          <div className="col-span-6 pl-4 relative h-[65vh] flex items-center">
+            {/* Slide 1 Content */}
+            <div
+              ref={right1Ref}
+              className="absolute inset-0 flex flex-col justify-center space-y-6 will-change-[transform,opacity]"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase w-fit">
+                OUR SOLUTIONS
+              </div>
 
-                  <p className="text-white/80 text-lg leading-relaxed max-w-lg font-sans">
-                    {svc.description}
-                  </p>
+              <p className="text-white/80 text-lg leading-relaxed max-w-lg font-sans">
+                {services[0].description}
+              </p>
 
-                  {/* List of 4 Sub-services with arrows */}
-                  <div className="space-y-3 pt-2">
-                    {svc.subServices.map((sub, sIdx) => (
-                      <div
-                        key={sIdx}
-                        className="group flex items-start justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-cyan-400/40 hover:bg-white/[0.07] transition-all"
-                      >
-                        <div className="pr-4">
-                          <span className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                            {sub.name}
-                          </span>
-                          <span className="text-xs text-white/50 block mt-0.5">
-                            {sub.description}
-                          </span>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-cyan-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all mt-1 shrink-0" />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Small Thumbnail Card & Learn More Pill */}
-                  <div className="pt-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/30 shadow-md">
-                        <Placeholder name={svc.thumb} ratio="1/1" className="w-full h-full" />
-                      </div>
-                      <div className="text-xs">
-                        <span className="text-white font-medium block">
-                          Biomimetic Formulation
-                        </span>
-                        <span className="text-white/50 text-[11px]">
-                          Precision shade & strength match
-                        </span>
-                      </div>
+              <div className="space-y-3 pt-2">
+                {services[0].subServices.map((sub, sIdx) => (
+                  <div
+                    key={sIdx}
+                    className="group flex items-start justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-cyan-400/40 hover:bg-white/[0.07] transition-all"
+                  >
+                    <div className="pr-4">
+                      <span className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                        {sub.name}
+                      </span>
+                      <span className="text-xs text-white/50 block mt-0.5">
+                        {sub.description}
+                      </span>
                     </div>
+                    <ArrowRight className="w-4 h-4 text-cyan-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all mt-1 shrink-0" />
+                  </div>
+                ))}
+              </div>
 
-                    <Link
-                      href={`/services#${svc.id}`}
-                      className="btn-pill-white text-xs !py-3 !px-6"
-                    >
-                      <span>Explore {svc.title}</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-cyan-300" />
-                    </Link>
+              <div className="pt-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/30 shadow-md">
+                    <Placeholder
+                      name={services[0].thumb}
+                      ratio="1/1"
+                      className="w-full h-full"
+                    />
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-white font-medium block">
+                      Biomimetic Formulation
+                    </span>
+                    <span className="text-white/50 text-[11px]">
+                      Precision shade & strength match
+                    </span>
                   </div>
                 </div>
-              );
-            })}
+
+                <Link
+                  href={`/services#${services[0].id}`}
+                  className="btn-pill-white text-xs !py-3 !px-6"
+                >
+                  <span>Explore {services[0].title}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-cyan-300" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Slide 2 Content */}
+            <div
+              ref={right2Ref}
+              className="absolute inset-0 flex flex-col justify-center space-y-6 will-change-[transform,opacity]"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase w-fit">
+                OUR SOLUTIONS
+              </div>
+
+              <p className="text-white/80 text-lg leading-relaxed max-w-lg font-sans">
+                {services[1].description}
+              </p>
+
+              <div className="space-y-3 pt-2">
+                {services[1].subServices.map((sub, sIdx) => (
+                  <div
+                    key={sIdx}
+                    className="group flex items-start justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-cyan-400/40 hover:bg-white/[0.07] transition-all"
+                  >
+                    <div className="pr-4">
+                      <span className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                        {sub.name}
+                      </span>
+                      <span className="text-xs text-white/50 block mt-0.5">
+                        {sub.description}
+                      </span>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-cyan-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all mt-1 shrink-0" />
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/30 shadow-md">
+                    <Placeholder
+                      name={services[1].thumb}
+                      ratio="1/1"
+                      className="w-full h-full"
+                    />
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-white font-medium block">
+                      Biomimetic Formulation
+                    </span>
+                    <span className="text-white/50 text-[11px]">
+                      Precision shade & strength match
+                    </span>
+                  </div>
+                </div>
+
+                <Link
+                  href={`/services#${services[1].id}`}
+                  className="btn-pill-white text-xs !py-3 !px-6"
+                >
+                  <span>Explore {services[1].title}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-cyan-300" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Slide 3 Content */}
+            <div
+              ref={right3Ref}
+              className="absolute inset-0 flex flex-col justify-center space-y-6 will-change-[transform,opacity]"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase w-fit">
+                OUR SOLUTIONS
+              </div>
+
+              <p className="text-white/80 text-lg leading-relaxed max-w-lg font-sans">
+                {services[2].description}
+              </p>
+
+              <div className="space-y-3 pt-2">
+                {services[2].subServices.map((sub, sIdx) => (
+                  <div
+                    key={sIdx}
+                    className="group flex items-start justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-cyan-400/40 hover:bg-white/[0.07] transition-all"
+                  >
+                    <div className="pr-4">
+                      <span className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                        {sub.name}
+                      </span>
+                      <span className="text-xs text-white/50 block mt-0.5">
+                        {sub.description}
+                      </span>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-cyan-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition-all mt-1 shrink-0" />
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/30 shadow-md">
+                    <Placeholder
+                      name={services[2].thumb}
+                      ratio="1/1"
+                      className="w-full h-full"
+                    />
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-white font-medium block">
+                      Biomimetic Formulation
+                    </span>
+                    <span className="text-white/50 text-[11px]">
+                      Precision shade & strength match
+                    </span>
+                  </div>
+                </div>
+
+                <Link
+                  href={`/services#${services[2].id}`}
+                  className="btn-pill-white text-xs !py-3 !px-6"
+                >
+                  <span>Explore {services[2].title}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-cyan-300" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -205,7 +569,11 @@ export default function ServicesSection() {
               className="rounded-3xl bg-white/[0.04] border border-white/10 p-6 space-y-5"
             >
               <div className="relative h-64 rounded-2xl overflow-hidden border border-cyan-400/20">
-                <Placeholder name={svc.image} ratio="16/9" className="w-full h-full" />
+                <Placeholder
+                  name={svc.image}
+                  ratio="16/9"
+                  className="w-full h-full"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#06163F] via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
                   <span className="text-[10px] font-mono uppercase text-cyan-400 block">
@@ -244,7 +612,10 @@ export default function ServicesSection() {
         {/* Bottom Banner */}
         <div className="relative z-20 pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-white/50">
           <span>Swiss Ceramic & Guided Surgical Technology</span>
-          <Link href="/services" className="text-cyan-400 hover:text-cyan-300 font-mono">
+          <Link
+            href="/services"
+            className="text-cyan-400 hover:text-cyan-300 font-mono"
+          >
             View Complete Treatment Menu →
           </Link>
         </div>

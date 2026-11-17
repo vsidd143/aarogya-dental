@@ -11,21 +11,21 @@ import {
   MessageCircle,
   ShieldCheck,
   CheckCircle2,
+  User,
+  ChevronDown,
 } from "lucide-react";
 
 export default function Footer() {
-  const [selectedBranch, setSelectedBranch] = useState<string>("mumbai");
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    treatment: "General / Not Sure",
+    address: "",
+    treatment: "Smile Makeover / Porcelain Veneers",
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
 
-  const currentBranch =
-    siteContent.contact.branches.find((b) => b.id === selectedBranch) ||
-    siteContent.contact.branches[0];
+  const currentBranch = siteContent.contact.branches[0];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +33,7 @@ export default function Footer() {
 
     // Build pre-filled WhatsApp message
     const cleanPhone = siteContent.contact.primaryPhone.replace(/\D/g, "");
-    const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Preferred Location:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
+    const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Patient Address:* ${formData.address}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
 
     const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(waLink, "_blank");
@@ -55,10 +55,6 @@ export default function Footer() {
           {/* Left Column: Clinic Invitation */}
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping inline-block" />
-                CONCIERGE DESK
-              </div>
               <h2 className="font-serif text-4xl sm:text-5xl text-white tracking-tight leading-[1.1] mb-6">
                 Reserve your <em>bespoke</em> consultation today.
               </h2>
@@ -85,231 +81,294 @@ export default function Footer() {
 
           {/* Right Column: Interactive Booking Form */}
           <div className="lg:col-span-7">
-            <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-3xl p-6 sm:p-10 shadow-2xl">
-              <h3 className="font-serif text-2xl text-white mb-2">
-                Request an Appointment
-              </h3>
-              <p className="text-white/60 text-xs sm:text-sm mb-6">
-                Select your preferred clinic location and our senior concierge will confirm your slot via WhatsApp or phone call.
-              </p>
+            <div className="relative rounded-[2rem] p-[1px] bg-gradient-to-b from-cyan-400/30 via-white/10 to-white/5 shadow-[0_25px_80px_rgba(0,0,0,0.6)]">
+              <div className="relative rounded-[1.95rem] bg-gradient-to-b from-[#091C4A]/90 via-[#05112E]/95 to-[#03091B]/95 backdrop-blur-2xl p-6 sm:p-10 overflow-hidden">
+                {/* Ambient Soft Glow Accents inside the card */}
+                <div className="absolute -top-24 -right-24 w-80 h-80 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-[#0B2A7A]/30 rounded-full blur-3xl pointer-events-none" />
 
-              {submitted ? (
-                <div className="p-8 rounded-2xl bg-emerald-500/10 border border-emerald-400/30 text-center space-y-4 animate-in fade-in">
-                  <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
-                    <CheckCircle2 className="w-8 h-8" />
-                  </div>
-                  <h4 className="font-serif text-2xl text-white">
-                    Request Received
-                  </h4>
-                  <p className="text-sm text-white/70 max-w-md mx-auto">
-                    Thank you, {formData.name}. We have prepared your request for{" "}
-                    <span className="text-cyan-300 font-semibold">{currentBranch.name}</span>.
-                    Our desk is connecting with you on WhatsApp right away.
-                  </p>
-                  <button
-                    onClick={() => setSubmitted(false)}
-                    className="btn-pill-white text-xs mt-2"
-                  >
-                    Submit Another Request
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {/* Branch Selection Radio Buttons */}
-                  <div>
-                    <label className="block text-xs font-mono uppercase tracking-wider text-cyan-300 mb-2">
-                      1. Select Clinic Location:
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      {siteContent.contact.branches.map((b) => (
-                        <label
-                          key={b.id}
-                          className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${
-                            selectedBranch === b.id
-                              ? "bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(18,164,219,0.25)]"
-                              : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="branch"
-                            value={b.id}
-                            checked={selectedBranch === b.id}
-                            onChange={(e) => setSelectedBranch(e.target.value)}
-                            className="sr-only"
-                          />
-                          <span
-                            className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${
-                              selectedBranch === b.id
-                                ? "border-cyan-400 bg-cyan-400"
-                                : "border-white/40"
-                            }`}
-                          >
-                            {selectedBranch === b.id && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />
-                            )}
-                          </span>
-                          <span className="text-xs font-medium truncate">
-                            {b.city}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Name & Phone */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-1.5">
-                        Your Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Rohini Iyer"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder-white/30 text-sm focus:outline-none focus:border-cyan-400 focus:bg-white/10 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-1.5">
-                        Phone Number / WhatsApp *
-                      </label>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="+91 98765 43210"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder-white/30 text-sm focus:outline-none focus:border-cyan-400 focus:bg-white/10 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Treatment Category */}
-                  <div>
-                    <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-1.5">
-                      Treatment Interest
-                    </label>
-                    <select
-                      value={formData.treatment}
-                      onChange={(e) =>
-                        setFormData({ ...formData, treatment: e.target.value })
-                      }
-                      className="w-full px-4 py-3 rounded-xl bg-[#06163F] border border-white/15 text-white text-sm focus:outline-none focus:border-cyan-400 transition-colors"
-                    >
-                      <option value="Smile Makeover / Porcelain Veneers">
-                        Esthetic: Smile Makeover & Porcelain Veneers
-                      </option>
-                      <option value="Guided Dental Implants">
-                        Restorative: Guided Dental Implants
-                      </option>
-                      <option value="CAD/CAM Same-Day Crowns">
-                        Restorative: CAD/CAM Same-Day Crowns
-                      </option>
-                      <option value="Invisible Clear Aligners">
-                        Orthodontics: Invisible Clear Aligners
-                      </option>
-                      <option value="Microscopic Root Canal Therapy">
-                        Endodontics: Microscopic Root Canal
-                      </option>
-                      <option value="Comprehensive Dental Checkup & Cleaning">
-                        Preventive: Comprehensive Dental Checkup & Laser Cleaning
-                      </option>
-                      <option value="Emergency Urgent Dental Relief">
-                        Urgent Relief: Same-Day Emergency Slot
-                      </option>
-                    </select>
-                  </div>
-
-                  {/* Message */}
-                  <div>
-                    <label className="block text-xs font-mono uppercase tracking-wider text-white/70 mb-1.5">
-                      Special Requests / Preferred Timing (Optional)
-                    </label>
-                    <textarea
-                      rows={2}
-                      placeholder="e.g. Prefer afternoon slot after 3 PM. Concerned about front tooth gap."
-                      value={formData.message}
-                      onChange={(e) =>
-                        setFormData({ ...formData, message: e.target.value })
-                      }
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder-white/30 text-sm focus:outline-none focus:border-cyan-400 focus:bg-white/10 transition-colors resize-none"
-                    />
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="pt-2 flex flex-col sm:flex-row items-center gap-4">
-                    <button
-                      type="submit"
-                      className="btn-pill-cyan w-full sm:w-auto !py-3.5 !px-8 flex items-center justify-center gap-2 group"
-                    >
-                      <span>Connect via WhatsApp Concierge</span>
-                      <MessageCircle className="w-4 h-4 text-slate-950 group-hover:scale-110 transition-transform" />
-                    </button>
-                    <span className="text-xs text-white/50">
-                      No automated bots · Real clinical coordinators
+                {/* Form Header */}
+                <div className="relative z-10 mb-7">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] font-mono tracking-[0.25em] text-cyan-300 uppercase font-semibold flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      Priority Reservation
+                    </span>
+                    <span className="text-[11px] font-mono text-white/50 tracking-wider">
+                      DIRECT DESK
                     </span>
                   </div>
-                </form>
-              )}
+                  <h3 className="font-serif text-3xl sm:text-4xl text-white font-medium tracking-tight leading-tight">
+                    Request an <span className="italic font-light text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-cyan-300 to-[#12A4DB]">Appointment</span>
+                  </h3>
+                  <p className="text-white/70 text-xs sm:text-sm mt-2 leading-relaxed">
+                    Our senior concierge will confirm your reservation at our South Mumbai clinic via WhatsApp or phone call.
+                  </p>
+                </div>
+
+                {submitted ? (
+                  <div className="relative z-10 p-8 sm:p-10 rounded-2xl bg-gradient-to-b from-cyan-500/15 via-emerald-500/10 to-transparent border border-cyan-400/40 text-center space-y-5 animate-in fade-in duration-500">
+                    <div className="w-16 h-16 rounded-full bg-cyan-400/20 text-cyan-300 flex items-center justify-center mx-auto ring-4 ring-cyan-400/10 shadow-[0_0_30px_rgba(18,164,219,0.4)]">
+                      <CheckCircle2 className="w-9 h-9" />
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-mono tracking-[0.25em] text-cyan-300 uppercase">
+                        Request Dispatched
+                      </span>
+                      <h4 className="font-serif text-2xl sm:text-3xl text-white font-medium">
+                        We Look Forward to Welcoming You
+                      </h4>
+                    </div>
+                    <p className="text-sm text-white/75 max-w-md mx-auto leading-relaxed">
+                      Thank you, <span className="text-white font-semibold">{formData.name}</span>. We have received your inquiry for{" "}
+                      <span className="text-cyan-300 font-semibold">{currentBranch.name}</span> ({currentBranch.city}). Our clinical coordinator is connecting with you on WhatsApp right away.
+                    </p>
+                    <div className="pt-2">
+                      <button
+                        onClick={() => setSubmitted(false)}
+                        className="px-6 py-2.5 rounded-full text-xs font-mono tracking-wider uppercase bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all hover:scale-105"
+                      >
+                        ← Submit Another Request
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="relative z-10 space-y-5">
+                    {/* Clinic Notice */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-cyan-300 shrink-0">
+                          <MapPin className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-white">
+                            South Mumbai Clinic
+                          </div>
+                          <div className="text-[11px] text-white/50">
+                            Marine Drive, Nariman Point, Mumbai 400021
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono tracking-wider px-2.5 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/25 uppercase font-medium self-start sm:self-auto">
+                        Mon – Sat · 10 AM – 8 PM
+                      </span>
+                    </div>
+
+                    {/* Name & Phone */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
+                          Your Full Name <span className="text-cyan-400">*</span>
+                        </label>
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 text-cyan-300/70 pointer-events-none">
+                            <User className="w-4 h-4" />
+                          </div>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Rohini Iyer"
+                            value={formData.name}
+                            onChange={(e) =>
+                              setFormData({ ...formData, name: e.target.value })
+                            }
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
+                          Phone / WhatsApp <span className="text-cyan-400">*</span>
+                        </label>
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 text-cyan-300/70 pointer-events-none">
+                            <Phone className="w-4 h-4" />
+                          </div>
+                          <input
+                            type="tel"
+                            required
+                            placeholder="+91 98765 43210"
+                            value={formData.phone}
+                            onChange={(e) =>
+                              setFormData({ ...formData, phone: e.target.value })
+                            }
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Patient Residential Address Option */}
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
+                        Patient Address / Residential Area <span className="text-cyan-400">*</span>
+                      </label>
+                      <div className="relative flex items-center">
+                        <div className="absolute left-4 text-cyan-300/70 pointer-events-none">
+                          <MapPin className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Nariman Point, South Mumbai / Bandra West"
+                          value={formData.address}
+                          onChange={(e) =>
+                            setFormData({ ...formData, address: e.target.value })
+                          }
+                          className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Treatment Category */}
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
+                        Treatment Interest
+                      </label>
+                      <div className="relative flex items-center">
+                        <select
+                          value={formData.treatment}
+                          onChange={(e) =>
+                            setFormData({ ...formData, treatment: e.target.value })
+                          }
+                          className="w-full px-4 pr-10 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all appearance-none cursor-pointer"
+                        >
+                          <option
+                            value="Smile Makeover / Porcelain Veneers"
+                            className="bg-[#05112E] text-white"
+                          >
+                            Esthetic: Smile Makeover & Porcelain Veneers
+                          </option>
+                          <option
+                            value="Guided Dental Implants"
+                            className="bg-[#05112E] text-white"
+                          >
+                            Restorative: Guided Dental Implants
+                          </option>
+                          <option
+                            value="CAD/CAM Same-Day Crowns"
+                            className="bg-[#05112E] text-white"
+                          >
+                            Restorative: CAD/CAM Same-Day Crowns
+                          </option>
+                          <option
+                            value="Invisible Clear Aligners"
+                            className="bg-[#05112E] text-white"
+                          >
+                            Orthodontics: Invisible Clear Aligners
+                          </option>
+                          <option
+                            value="Microscopic Root Canal Therapy"
+                            className="bg-[#05112E] text-white"
+                          >
+                            Endodontics: Microscopic Root Canal
+                          </option>
+                          <option
+                            value="Comprehensive Dental Checkup & Cleaning"
+                            className="bg-[#05112E] text-white"
+                          >
+                            Preventive: Comprehensive Dental Checkup & Laser Cleaning
+                          </option>
+                          <option
+                            value="Emergency Urgent Dental Relief"
+                            className="bg-[#05112E] text-white"
+                          >
+                            Urgent Relief: Same-Day Emergency Slot
+                          </option>
+                        </select>
+                        <div className="absolute right-4 text-white/40 pointer-events-none">
+                          <ChevronDown className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Message / Special Requests */}
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
+                        Special Requests / Preferred Timing{" "}
+                        <span className="text-white/40 font-normal lowercase">
+                          (optional)
+                        </span>
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="e.g. Prefer afternoon slot after 3 PM. Concerned about front tooth gap."
+                        value={formData.message}
+                        onChange={(e) =>
+                          setFormData({ ...formData, message: e.target.value })
+                        }
+                        className="w-full px-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all resize-none"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="pt-2">
+                      <button
+                        type="submit"
+                        className="relative group overflow-hidden rounded-full py-3.5 px-8 bg-gradient-to-r from-cyan-400 via-cyan-300 to-[#12A4DB] text-slate-950 font-semibold text-sm tracking-wide shadow-[0_10px_35px_rgba(18,164,219,0.35)] hover:shadow-[0_12px_45px_rgba(18,164,219,0.55)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer w-full sm:w-auto"
+                      >
+                        <span>Connect via WhatsApp Chat</span>
+                        <MessageCircle className="w-4 h-4 text-slate-950 group-hover:scale-110 transition-transform" />
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 3 Location Blocks */}
+        {/* Clinic Location Block */}
         <div className="py-16 border-b border-white/10">
           <div className="text-xs font-mono uppercase tracking-widest text-cyan-400 mb-8">
-            Our Flagship Clinic Locations
+            Our Clinic Location
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="max-w-2xl">
             {siteContent.contact.branches.map((b) => (
               <div
                 key={b.id}
-                className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-cyan-400/30 transition-all group"
+                className="p-7 sm:p-8 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-cyan-400/30 transition-all group"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-serif text-xl text-white group-hover:text-cyan-300 transition-colors">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-serif text-2xl text-white group-hover:text-cyan-300 transition-colors">
                     {b.name}
                   </h4>
-                  <span className="text-[10px] font-mono tracking-wider px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-400/20">
+                  <span className="text-xs font-mono tracking-wider px-3 py-1 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-400/20">
                     {b.city}
                   </span>
                 </div>
 
-                <div className="space-y-3 text-xs text-white/70">
-                  <div className="flex items-start gap-2.5">
-                    <MapPin className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div className="space-y-3.5 text-sm text-white/70">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
                     <p className="leading-relaxed">{b.address}</p>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <Phone className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <a
-                      href={`tel:${b.phone.replace(/\s+/g, "")}`}
-                      className="hover:text-cyan-300 font-mono"
-                    >
-                      {b.phone}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span>{b.timings}</span>
+                  <div className="flex flex-wrap items-center gap-6 pt-1">
+                    <div className="flex items-center gap-2.5">
+                      <Phone className="w-4 h-4 text-cyan-400 shrink-0" />
+                      <a
+                        href={`tel:${b.phone.replace(/\s+/g, "")}`}
+                        className="hover:text-cyan-300 font-mono text-xs sm:text-sm"
+                      >
+                        {b.phone}
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
+                      <span className="text-xs sm:text-sm">{b.timings}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
+                <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
                   <a
                     href={b.mapUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1 font-medium"
+                    className="text-xs text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1.5 font-medium"
                   >
-                    View on Google Maps <ArrowRight className="w-3 h-3" />
+                    View on Google Maps <ArrowRight className="w-3.5 h-3.5" />
                   </a>
                 </div>
               </div>
@@ -346,7 +405,7 @@ export default function Footer() {
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 border border-white/10 flex items-center justify-center transition-colors"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                 </svg>
               </a>
               <a
@@ -357,7 +416,7 @@ export default function Footer() {
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 border border-white/10 flex items-center justify-center transition-colors"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.7 5H18V0h-3.808C10.595 0 9 1.583 9 4.615V8z"/>
+                  <path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.7 5H18V0h-3.808C10.595 0 9 1.583 9 4.615V8z" />
                 </svg>
               </a>
               <a
@@ -368,7 +427,7 @@ export default function Footer() {
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 border border-white/10 flex items-center justify-center transition-colors"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/>
+                  <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" />
                 </svg>
               </a>
               <a
@@ -379,7 +438,7 @@ export default function Footer() {
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 border border-white/10 flex items-center justify-center transition-colors"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                 </svg>
               </a>
             </div>

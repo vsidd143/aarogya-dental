@@ -10,7 +10,7 @@ import CtaSection from "@/components/home/CtaSection";
 
 export default function HomePage() {
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative w-full overflow-x-clip">
       {/* Section 1: Hero Pinned Scene (~400vh) */}
       <HeroSection />
 

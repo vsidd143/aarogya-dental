@@ -6,7 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Placeholder from "@/components/ui/Placeholder";
 import { siteContent } from "@/data/content";
-import { ArrowRight, Award } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -62,10 +62,7 @@ export default function AboutSection() {
     >
       <div className="max-w-6xl mx-auto">
         {/* Section Header Tag */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-8 h-8 rounded-full bg-[#0B2A7A]/10 border border-[#12A4DB]/30 flex items-center justify-center text-[#0B2A7A]">
-            <Award className="w-4 h-4 text-[#12A4DB]" />
-          </div>
+        <div className="mb-10">
           <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#0B2A7A] font-semibold">
             The Aarogya Manifesto
           </span>

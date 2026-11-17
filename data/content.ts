@@ -84,28 +84,6 @@ export const siteContent = {
         timings: "Mon - Sat: 10:00 AM – 8:00 PM",
         mapUrl: "https://maps.google.com/?q=Marine+Drive+Mumbai",
       },
-      {
-        id: "pune",
-        name: "Koregaon Park Clinic",
-        city: "Pune",
-        address: "Floor 3, Koregaon Park Plaza, North Main Road, Lane 7, Pune 411001",
-        phone: "+91 20 6600 4321",
-        whatsapp: "+91 98765 43210",
-        email: "pune@aarogyadental.com",
-        timings: "Mon - Sat: 10:00 AM – 8:00 PM",
-        mapUrl: "https://maps.google.com/?q=Koregaon+Park+Pune",
-      },
-      {
-        id: "bengaluru",
-        name: "Indiranagar Centre",
-        city: "Bengaluru",
-        address: "Villa 14, 100ft Road, HAL 2nd Stage, Indiranagar, Bengaluru 560038",
-        phone: "+91 80 4400 4321",
-        whatsapp: "+91 98765 43210",
-        email: "bengaluru@aarogyadental.com",
-        timings: "Mon - Sat: 10:00 AM – 8:00 PM",
-        mapUrl: "https://maps.google.com/?q=Indiranagar+Bengaluru",
-      },
     ] as BranchInfo[],
     socials: {
       instagram: "https://instagram.com/aarogyadental",
@@ -120,7 +98,7 @@ export const siteContent = {
     headlineOverlayWord: "Dentistry",
     description:
       "Precision clinical dentistry meets natural facial aesthetics. Experience compassionate, world-class dental care designed around your smile.",
-    locationBadge: "Based in: South Mumbai · Pune · Bengaluru",
+    locationBadge: "Based in: South Mumbai",
     captions: [
       "Designing smiles that are as healthy as they are beautiful.",
       "We combine advanced science with an artist's touch.",
@@ -133,11 +111,11 @@ export const siteContent = {
     leadDoctorExcerpt:
       "Under the clinical guidance of Dr. Ananya Sharma and our specialist team, every procedure merges biological preservation with artistic precision.",
     subText:
-      "From bespoke porcelain laminates to guided full-arch rehabilitation, our clinics in Mumbai, Pune, and Bengaluru combine hospital-grade sterilization with luxury hospitality.",
+      "From bespoke porcelain laminates to guided full-arch rehabilitation, our South Mumbai clinic combines hospital-grade sterilization with luxury hospitality.",
     stats: [
       { label: "Google Rating", value: "4.9/5", detail: "Over 1,200 verified reviews" },
       { label: "Patient Satisfaction", value: "99.2%", detail: "Consistent clinical outcomes" },
-      { label: "Smiles Restored", value: "10,000+", detail: "Across 3 flagship locations" },
+      { label: "Smiles Restored", value: "10,000+", detail: "At our South Mumbai clinic" },
       { label: "Years of Care", value: "16+", detail: "Trusted since 2008" },
     ],
   },
@@ -404,12 +382,12 @@ export const siteContent = {
     {
       question: "Do you offer emergency dental appointments for broken teeth or acute pain?",
       answer:
-        "Yes, all three of our clinics in Mumbai, Pune, and Bengaluru maintain emergency reserve slots every day. Please call or WhatsApp our concierge line immediately, and our team will accommodate you on the same day.",
+        "Yes, our South Mumbai clinic maintains emergency reserve slots every day. Please call or WhatsApp our concierge line immediately, and our team will accommodate you on the same day.",
     },
     {
-      question: "Can I choose my treatment location between Mumbai, Pune, and Bengaluru?",
+      question: "Where is Aarogya Dental Clinic located?",
       answer:
-        "All our patient medical records, 3D scans, and treatment plans are securely synchronized across our cloud infrastructure. You can begin treatment in Mumbai, attend checkups in Pune, or wrap up in Bengaluru with seamless continuity under the same standard of clinical care.",
+        "Our clinic is located at Suite 402, Sea View Chambers, Marine Drive, Nariman Point, South Mumbai. Valet parking and private concierge assistance are available upon arrival.",
     },
   ],
   gallery: [

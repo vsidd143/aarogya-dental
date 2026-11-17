@@ -13,7 +13,6 @@ export default function HeroSection() {
   const pinRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
-  const dentistryWordRef = useRef<HTMLSpanElement>(null);
   const slide1Ref = useRef<HTMLDivElement>(null);
   const slide2Ref = useRef<HTMLDivElement>(null);
   const slide3Ref = useRef<HTMLDivElement>(null);
@@ -63,17 +62,6 @@ export default function HeroSection() {
           duration: 1.5,
         },
         0
-      );
-
-      tl.to(
-        dentistryWordRef.current,
-        {
-          xPercent: -30,
-          opacity: 0,
-          ease: "power2.inOut",
-          duration: 1.2,
-        },
-        0.2
       );
 
       tl.to(
@@ -157,15 +145,15 @@ export default function HeroSection() {
       data-section-theme="light"
       className="relative bg-[#F4F8FF] overflow-hidden z-10"
     >
-      {/* Pinned Desktop Viewport (100vh) */}
+      {/* Viewport: Natural Flow on Mobile, Pinned on Desktop (100vh) */}
       <div
         ref={pinRef}
-        className="relative w-full h-screen overflow-hidden flex flex-col lg:flex-row"
+        className="relative w-full h-auto lg:h-screen lg:overflow-hidden flex flex-col lg:flex-row"
       >
         {/* Left 42% Panel: Off-white Clinic Intro */}
         <div
           ref={leftPanelRef}
-          className="relative w-full lg:w-[42%] h-full bg-[#F4F8FF] z-20 flex flex-col justify-between px-6 sm:px-12 lg:px-14 pt-28 pb-10 shadow-xl lg:shadow-none"
+          className="relative w-full lg:w-[42%] h-auto lg:h-full bg-[#F4F8FF] z-20 flex flex-col justify-between px-6 sm:px-12 lg:px-14 pt-28 sm:pt-32 pb-10 shadow-xl lg:shadow-none"
         >
           {/* Subtle noise texture */}
           <div
@@ -182,15 +170,13 @@ export default function HeroSection() {
               {siteContent.hero.badge}
             </div>
 
-            {/* Split Headline Line 1 */}
+            {/* Headline */}
             <h1 className="font-serif text-5xl sm:text-6xl xl:text-7xl text-[#0B2A7A] font-medium tracking-tight leading-[0.98] mb-6">
-              {siteContent.hero.headlineLine1}
+              {siteContent.hero.headlineLine1}{" "}
+              <span className="italic text-[#12A4DB] block">
+                {siteContent.hero.headlineOverlayWord}
+              </span>
             </h1>
-
-            {/* Mobile-only Dentistry Word (on desktop it overlaps into right pane) */}
-            <div className="lg:hidden font-serif italic text-4xl sm:text-5xl text-[#12A4DB] font-normal leading-[0.9] -mt-3 mb-6">
-              {siteContent.hero.headlineOverlayWord}
-            </div>
 
             {/* Editorial Description */}
             <p className="text-[#06163F]/80 text-base sm:text-lg leading-relaxed max-w-md mb-8 font-sans">
@@ -213,7 +199,7 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Bottom-left: Flagship Locations */}
+          {/* Bottom-left: Clinic Location */}
           <div className="relative z-10 pt-8 border-t border-[#0B2A7A]/10 flex items-center gap-2 text-xs font-mono text-[#0B2A7A]/70">
             <MapPin className="w-3.5 h-3.5 text-[#12A4DB]" />
             <span>{siteContent.hero.locationBadge}</span>
@@ -223,15 +209,8 @@ export default function HeroSection() {
         {/* Right 58% Panel: Image Sequence + Dentistry Overlap */}
         <div
           ref={rightPanelRef}
-          className="relative w-full lg:w-[58%] h-[55vh] lg:h-full lg:absolute lg:right-0 lg:top-0 z-10 overflow-hidden bg-slate-950"
+          className="relative w-full lg:w-[58%] h-[50vh] sm:h-[60vh] lg:h-full lg:absolute lg:right-0 lg:top-0 z-10 overflow-hidden bg-slate-950"
         >
-          {/* Overlapping "Dentistry" Word in White Italic Serif */}
-          <span
-            ref={dentistryWordRef}
-            className="hidden lg:block absolute left-[-8%] top-[24%] z-30 font-serif italic text-7xl xl:text-8xl 2xl:text-9xl text-white font-normal drop-shadow-[0_4px_30px_rgba(0,0,0,0.6)] pointer-events-none select-none tracking-tight"
-          >
-            {siteContent.hero.headlineOverlayWord}
-          </span>
 
           {/* Slide 1: hero-1.jpg */}
           <div

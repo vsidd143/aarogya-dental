@@ -33,7 +33,7 @@ export default function AboutPage() {
               {siteContent.about.heroStatement}
             </p>
             <p className="text-[#06163F]/70 text-sm leading-relaxed">
-              At Aarogya, we discard the sterile, intimidating atmosphere of traditional dental clinics. Every suite in our Mumbai, Pune, and Bengaluru locations is engineered for acoustic serenity, natural daylight, and ergonomic tranquility.
+              At Aarogya, we discard the sterile, intimidating atmosphere of traditional dental clinics. Every suite in our South Mumbai clinic is engineered for acoustic serenity, natural daylight, and ergonomic tranquility.
             </p>
 
             <div className="pt-4 grid grid-cols-2 gap-4">

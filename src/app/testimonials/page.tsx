@@ -5,7 +5,7 @@ import { Star, ShieldCheck, ExternalLink } from "lucide-react";
 
 export const metadata = {
   title: "Patient Testimonials | Aarogya Dental Clinic",
-  description: "Read verified patient reviews and experiences across our Mumbai, Pune, and Bengaluru clinics.",
+  description: "Read verified patient reviews and experiences at our South Mumbai clinic.",
 };
 
 export default function TestimonialsPage() {

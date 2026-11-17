@@ -206,16 +206,8 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Right: Patient form + Phone + Book A Call + */}
+          {/* Right: Phone + Book A Call + */}
           <div className="flex items-center gap-4 sm:gap-6">
-            <a
-              href="#footer-booking"
-              className={`hidden md:flex items-center gap-1 text-xs sm:text-sm font-medium tracking-wide transition-colors ${rightColor} hover:opacity-80`}
-            >
-              <span>Patient form</span>
-              <span className="text-xs">↗</span>
-            </a>
-
             <a
               href={`tel:${siteContent.contact.primaryPhone.replace(/\s+/g, "")}`}
               className={`hidden sm:flex items-center gap-1 text-xs sm:text-sm font-medium tracking-wide transition-colors ${rightColor} hover:opacity-80`}

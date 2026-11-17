@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 export const metadata = {
   title: "Clinical Services | Aarogya Dental Clinic",
   description:
-    "Explore our 3 flagship disciplines: Esthetic Dentistry, Restorative Dentistry, and Beyond the Smile.",
+    "Explore our 3 clinical disciplines: Esthetic Dentistry, Restorative Dentistry, and Beyond the Smile.",
 };
 
 export default function ServicesPage() {
