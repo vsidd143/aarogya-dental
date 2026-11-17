@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   User,
   ChevronDown,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 
 export default function Footer() {
@@ -22,19 +24,70 @@ export default function Footer() {
     address: "",
     treatment: "Smile Makeover / Porcelain Veneers",
     message: "",
+    website_trap: "", // Honeypot field for bot protection
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const currentBranch = siteContent.contact.branches[0];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setErrorMessage(null);
 
-    // Build pre-filled WhatsApp message
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit request.");
+      }
+
+      // Success: mark form submitted
+      setSubmitted(true);
+
+      // Independent WhatsApp launch: opens direct concierge chat without blocking email status
+      try {
+        const cleanPhone = siteContent.contact.primaryPhone.replace(/\D/g, "");
+        const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Patient Address:* ${formData.address}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
+        const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+        window.open(waLink, "_blank");
+      } catch {
+        // Non-blocking if popups are suppressed
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
+      setErrorMessage(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReset = () => {
+    setSubmitted(false);
+    setErrorMessage(null);
+    setFormData({
+      name: "",
+      phone: "",
+      address: "",
+      treatment: "Smile Makeover / Porcelain Veneers",
+      message: "",
+      website_trap: "",
+    });
+  };
+
+  const handleDirectWhatsAppFallback = () => {
     const cleanPhone = siteContent.contact.primaryPhone.replace(/\D/g, "");
-    const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Patient Address:* ${formData.address}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
-
+    const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name || "Patient"}\n*Phone:* ${formData.phone || "Not provided"}\n*Patient Address:* ${formData.address || "Not provided"}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
     const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(waLink, "_blank");
   };
@@ -113,20 +166,28 @@ export default function Footer() {
                     </div>
                     <div className="space-y-1">
                       <span className="text-[11px] font-mono tracking-[0.25em] text-cyan-300 uppercase">
-                        Request Dispatched
+                        Request Confirmed & Dispatched
                       </span>
                       <h4 className="font-serif text-2xl sm:text-3xl text-white font-medium">
                         We Look Forward to Welcoming You
                       </h4>
                     </div>
                     <p className="text-sm text-white/75 max-w-md mx-auto leading-relaxed">
-                      Thank you, <span className="text-white font-semibold">{formData.name}</span>. We have received your inquiry for{" "}
+                      Thank you, <span className="text-white font-semibold">{formData.name}</span>. An email notification has been delivered directly to our desk for{" "}
                       <span className="text-cyan-300 font-semibold">{currentBranch.name}</span> ({currentBranch.city}). Our clinical coordinator is connecting with you on WhatsApp right away.
                     </p>
-                    <div className="pt-2">
+                    <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
                       <button
-                        onClick={() => setSubmitted(false)}
-                        className="px-6 py-2.5 rounded-full text-xs font-mono tracking-wider uppercase bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all hover:scale-105"
+                        type="button"
+                        onClick={handleDirectWhatsAppFallback}
+                        className="px-6 py-2.5 rounded-full text-xs font-mono tracking-wider uppercase bg-[#25D366] hover:bg-[#20bd5a] text-white transition-all flex items-center gap-2 shadow-lg cursor-pointer"
+                      >
+                        <MessageCircle className="w-4 h-4" /> Open WhatsApp Concierge
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleReset}
+                        className="px-6 py-2.5 rounded-full text-xs font-mono tracking-wider uppercase bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all hover:scale-105 cursor-pointer"
                       >
                         ← Submit Another Request
                       </button>
@@ -134,6 +195,39 @@ export default function Footer() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="relative z-10 space-y-5">
+                    {/* Honeypot field (hidden from genuine users, traps automated bots) */}
+                    <input
+                      type="text"
+                      name="website_trap"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={formData.website_trap}
+                      onChange={(e) =>
+                        setFormData({ ...formData, website_trap: e.target.value })
+                      }
+                      style={{ display: "none", position: "absolute", left: "-9999px" }}
+                      aria-hidden="true"
+                    />
+
+                    {/* Error Banner */}
+                    {errorMessage && (
+                      <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-xs flex items-start gap-3">
+                        <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                        <div className="space-y-2 flex-1">
+                          <p className="leading-relaxed">{errorMessage}</p>
+                          <div className="flex items-center gap-3 pt-1">
+                            <button
+                              type="button"
+                              onClick={handleDirectWhatsAppFallback}
+                              className="text-[11px] font-mono tracking-wider uppercase underline hover:text-white flex items-center gap-1 cursor-pointer"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" /> Chat directly via WhatsApp
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Clinic Notice */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 gap-2">
                       <div className="flex items-center gap-2.5">
@@ -167,12 +261,13 @@ export default function Footer() {
                           <input
                             type="text"
                             required
+                            disabled={isSubmitting}
                             placeholder="Rohini Iyer"
                             value={formData.name}
                             onChange={(e) =>
                               setFormData({ ...formData, name: e.target.value })
                             }
-                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all"
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all disabled:opacity-50"
                           />
                         </div>
                       </div>
@@ -188,12 +283,13 @@ export default function Footer() {
                           <input
                             type="tel"
                             required
+                            disabled={isSubmitting}
                             placeholder="+91 98765 43210"
                             value={formData.phone}
                             onChange={(e) =>
                               setFormData({ ...formData, phone: e.target.value })
                             }
-                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all"
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all disabled:opacity-50"
                           />
                         </div>
                       </div>
@@ -211,12 +307,13 @@ export default function Footer() {
                         <input
                           type="text"
                           required
+                          disabled={isSubmitting}
                           placeholder="e.g. Nariman Point, South Mumbai / Bandra West"
                           value={formData.address}
                           onChange={(e) =>
                             setFormData({ ...formData, address: e.target.value })
                           }
-                          className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all"
+                          className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -229,10 +326,11 @@ export default function Footer() {
                       <div className="relative flex items-center">
                         <select
                           value={formData.treatment}
+                          disabled={isSubmitting}
                           onChange={(e) =>
                             setFormData({ ...formData, treatment: e.target.value })
                           }
-                          className="w-full px-4 pr-10 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all appearance-none cursor-pointer"
+                          className="w-full px-4 pr-10 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all appearance-none cursor-pointer disabled:opacity-50"
                         >
                           <option
                             value="Smile Makeover / Porcelain Veneers"
@@ -293,24 +391,40 @@ export default function Footer() {
                       </label>
                       <textarea
                         rows={2}
+                        disabled={isSubmitting}
                         placeholder="e.g. Prefer afternoon slot after 3 PM. Concerned about front tooth gap."
                         value={formData.message}
                         onChange={(e) =>
                           setFormData({ ...formData, message: e.target.value })
                         }
-                        className="w-full px-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all resize-none"
+                        className="w-full px-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all resize-none disabled:opacity-50"
                       />
                     </div>
 
-                    {/* Submit Button */}
-                    <div className="pt-2">
+                    {/* Submit Button & Assurance */}
+                    <div className="pt-2 flex flex-col sm:flex-row sm:items-center gap-4">
                       <button
                         type="submit"
-                        className="relative group overflow-hidden rounded-full py-3.5 px-8 bg-gradient-to-r from-cyan-400 via-cyan-300 to-[#12A4DB] text-slate-950 font-semibold text-sm tracking-wide shadow-[0_10px_35px_rgba(18,164,219,0.35)] hover:shadow-[0_12px_45px_rgba(18,164,219,0.55)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer w-full sm:w-auto"
+                        disabled={isSubmitting}
+                        className="relative group overflow-hidden rounded-full py-3.5 px-8 bg-gradient-to-r from-cyan-400 via-cyan-300 to-[#12A4DB] text-slate-950 font-semibold text-sm tracking-wide shadow-[0_10px_35px_rgba(18,164,219,0.35)] hover:shadow-[0_12px_45px_rgba(18,164,219,0.55)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer w-full sm:w-auto disabled:opacity-75 disabled:pointer-events-none"
                       >
-                        <span>Connect via WhatsApp Chat</span>
-                        <MessageCircle className="w-4 h-4 text-slate-950 group-hover:scale-110 transition-transform" />
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                            <span>Confirming with Desk...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Connect via WhatsApp Concierge</span>
+                            <MessageCircle className="w-4 h-4 text-slate-950 group-hover:scale-110 transition-transform" />
+                          </>
+                        )}
                       </button>
+
+                      <div className="flex items-center gap-2 text-xs text-white/50">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                        <span>Real clinical coordinators · No automated bots</span>
+                      </div>
                     </div>
                   </form>
                 )}
