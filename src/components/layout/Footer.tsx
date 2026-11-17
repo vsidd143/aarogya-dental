@@ -5,6 +5,7 @@ import Link from "next/link";
 import { siteContent } from "@/data/content";
 import {
   Phone,
+  Mail,
   MapPin,
   Clock,
   ArrowRight,
@@ -20,6 +21,7 @@ import {
 export default function Footer() {
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     phone: "",
     address: "",
     treatment: "Smile Makeover / Porcelain Veneers",
@@ -58,7 +60,7 @@ export default function Footer() {
       // Independent WhatsApp launch: opens direct concierge chat without blocking email status
       try {
         const cleanPhone = siteContent.contact.primaryPhone.replace(/\D/g, "");
-        const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Patient Address:* ${formData.address}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
+        const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name}\n*Email:* ${formData.email}\n*Phone:* ${formData.phone}\n*Patient Address:* ${formData.address}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
         const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
         window.open(waLink, "_blank");
       } catch {
@@ -77,6 +79,7 @@ export default function Footer() {
     setErrorMessage(null);
     setFormData({
       name: "",
+      email: "",
       phone: "",
       address: "",
       treatment: "Smile Makeover / Porcelain Veneers",
@@ -87,7 +90,7 @@ export default function Footer() {
 
   const handleDirectWhatsAppFallback = () => {
     const cleanPhone = siteContent.contact.primaryPhone.replace(/\D/g, "");
-    const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name || "Patient"}\n*Phone:* ${formData.phone || "Not provided"}\n*Patient Address:* ${formData.address || "Not provided"}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
+    const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name || "Patient"}\n*Email:* ${formData.email || "Not provided"}\n*Phone:* ${formData.phone || "Not provided"}\n*Patient Address:* ${formData.address || "Not provided"}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
     const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(waLink, "_blank");
   };
@@ -248,7 +251,7 @@ export default function Footer() {
                       </span>
                     </div>
 
-                    {/* Name & Phone */}
+                    {/* Row 1: Name & Phone */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
@@ -295,26 +298,50 @@ export default function Footer() {
                       </div>
                     </div>
 
-                    {/* Patient Residential Address Option */}
-                    <div className="space-y-1.5">
-                      <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
-                        Patient Address / Residential Area <span className="text-cyan-400">*</span>
-                      </label>
-                      <div className="relative flex items-center">
-                        <div className="absolute left-4 text-cyan-300/70 pointer-events-none">
-                          <MapPin className="w-4 h-4" />
+                    {/* Row 2: Email Address & Patient Residential Address */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
+                          Email Address <span className="text-cyan-400">*</span>
+                        </label>
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 text-cyan-300/70 pointer-events-none">
+                            <Mail className="w-4 h-4" />
+                          </div>
+                          <input
+                            type="email"
+                            required
+                            disabled={isSubmitting}
+                            placeholder="rohini@example.com"
+                            value={formData.email}
+                            onChange={(e) =>
+                              setFormData({ ...formData, email: e.target.value })
+                            }
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all disabled:opacity-50"
+                          />
                         </div>
-                        <input
-                          type="text"
-                          required
-                          disabled={isSubmitting}
-                          placeholder="e.g. Nariman Point, South Mumbai / Bandra West"
-                          value={formData.address}
-                          onChange={(e) =>
-                            setFormData({ ...formData, address: e.target.value })
-                          }
-                          className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all disabled:opacity-50"
-                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
+                          Patient Address / Area <span className="text-cyan-400">*</span>
+                        </label>
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 text-cyan-300/70 pointer-events-none">
+                            <MapPin className="w-4 h-4" />
+                          </div>
+                          <input
+                            type="text"
+                            required
+                            disabled={isSubmitting}
+                            placeholder="e.g. Nariman Point, South Mumbai"
+                            value={formData.address}
+                            onChange={(e) =>
+                              setFormData({ ...formData, address: e.target.value })
+                            }
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white placeholder-white/25 text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all disabled:opacity-50"
+                          />
+                        </div>
                       </div>
                     </div>
 

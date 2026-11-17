@@ -18,35 +18,39 @@ export default function InnerPageHero({
   return (
     <div
       data-section-theme="dark"
-      className="inner-wave-header relative pt-36 pb-28 text-white px-4 sm:px-8 overflow-hidden"
+      className="inner-wave-header relative pt-36 pb-28 text-white px-4 sm:px-8 overflow-hidden bg-[#06163F] bg-gradient-to-b from-[#06163F] via-[#0B2A7A] to-[#040e2b]"
+      style={{
+        backgroundColor: "#06163F",
+        backgroundImage: "linear-gradient(135deg, #06163F 0%, #0B2A7A 50%, #030d28 100%)",
+      }}
     >
       {/* Background radial ambient lights */}
       <div className="absolute top-1/4 -right-20 w-96 h-96 bg-cyan-400/20 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-80 h-80 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-80 h-80 bg-blue-600/25 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-5xl mx-auto relative z-10 text-center">
         {/* Breadcrumb */}
-        <div className="flex items-center justify-center gap-2 text-xs font-mono text-cyan-300/80 mb-4">
+        <div className="flex items-center justify-center gap-2 text-xs font-mono text-cyan-300/90 mb-4">
           <Link href="/" className="hover:text-white transition-colors">
             Home
           </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-white/40" />
+          <ChevronRight className="w-3.5 h-3.5 text-white/50" />
           <span className="text-white font-medium">{breadcrumb}</span>
         </div>
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 text-xs font-mono tracking-widest uppercase mb-4">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 text-xs font-mono tracking-widest uppercase mb-4 shadow-[0_0_15px_rgba(18,164,219,0.25)]">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-ping" />
           {badge}
         </div>
 
         {/* Main Title */}
-        <h1 className="font-serif text-4xl sm:text-6xl text-white font-medium tracking-tight mb-4">
+        <h1 className="font-serif text-4xl sm:text-6xl text-white font-medium tracking-tight mb-4 drop-shadow-md">
           {title}
         </h1>
 
         {/* Subtitle */}
-        <p className="text-white/80 text-base sm:text-lg max-w-2xl mx-auto font-sans leading-relaxed">
+        <p className="text-white/85 text-base sm:text-lg max-w-2xl mx-auto font-sans leading-relaxed">
           {subtitle}
         </p>
       </div>

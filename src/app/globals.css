@@ -123,8 +123,14 @@ h1, h2, h3, .font-serif {
 }
 
 /* Blue Wave Header for inner pages */
+@utility inner-wave-header {
+  background: linear-gradient(135deg, #06163F 0%, #0B2A7A 50%, #030d28 100%);
+  background-color: #06163F;
+}
+
 .inner-wave-header {
-  background: linear-gradient(135deg, #06163F 0%, #0B2A7A 50%, #12A4DB 100%);
+  background: linear-gradient(135deg, #06163F 0%, #0B2A7A 50%, #030d28 100%) !important;
+  background-color: #06163F !important;
   position: relative;
   overflow: hidden;
 }

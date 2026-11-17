@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON request body." }, { status: 400 });
     }
 
-    const { name, phone, address, treatment, message, website_trap } = body;
+    const { name, email, phone, address, treatment, message, website_trap } = body;
 
     // 3. Honeypot check (Spam bot detection)
     if (website_trap && typeof website_trap === "string" && website_trap.trim() !== "") {
@@ -77,6 +77,13 @@ export async function POST(req: NextRequest) {
     if (!name || typeof name !== "string" || name.trim().length < 2 || name.trim().length > 100) {
       return NextResponse.json(
         { error: "Please provide a valid full name (2-100 characters)." },
+        { status: 400 }
+      );
+    }
+
+    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().length > 150) {
+      return NextResponse.json(
+        { error: "Please provide a valid email address (e.g. name@example.com)." },
         { status: 400 }
       );
     }
@@ -104,13 +111,14 @@ export async function POST(req: NextRequest) {
     }
 
     const safeName = escapeHtml(name.trim());
+    const safeEmail = escapeHtml(email.trim());
     const safePhone = escapeHtml(phone.trim());
     const safeAddress = escapeHtml(address.trim());
     const safeTreatment = escapeHtml(typeof treatment === "string" && treatment.trim() ? treatment.trim() : "General Consultation & Evaluation");
     const safeMessage = typeof message === "string" ? escapeHtml(message.trim().slice(0, 2000)) : "";
 
     // 5. Duplicate Submission Prevention (60s window)
-    const submissionHash = `${safeName.toLowerCase()}_${cleanPhone}_${safeTreatment.toLowerCase()}`;
+    const submissionHash = `${safeName.toLowerCase()}_${safeEmail.toLowerCase()}_${cleanPhone}_${safeTreatment.toLowerCase()}`;
     const previousSubmissionTime = recentSubmissions.get(submissionHash);
     if (previousSubmissionTime && now - previousSubmissionTime < 60 * 1000) {
       return NextResponse.json(
@@ -211,6 +219,14 @@ export async function POST(req: NextRequest) {
                 </tr>
                 <tr>
                   <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">
+                    Email Address
+                  </td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #06163F;">
+                    <a href="mailto:${safeEmail}" style="color: #0284c7; text-decoration: none;">${safeEmail}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">
                     Phone / WhatsApp
                   </td>
                   <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #06163F;">
@@ -265,11 +281,14 @@ export async function POST(req: NextRequest) {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center" style="padding-top: 8px;">
-                    <a href="${whatsappDirectLink}" target="_blank" style="display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 13px 24px; border-radius: 8px; margin-right: 8px; margin-bottom: 8px;">
+                    <a href="${whatsappDirectLink}" target="_blank" style="display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 13px 22px; border-radius: 8px; margin-right: 8px; margin-bottom: 8px;">
                       💬 Open WhatsApp Conversation
                     </a>
-                    <a href="tel:${cleanPhone}" style="display: inline-block; background-color: #06163F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 13px 24px; border-radius: 8px; margin-bottom: 8px;">
-                      📞 Call Patient Now
+                    <a href="mailto:${safeEmail}?subject=${encodeURIComponent(`Appointment Confirmation - Aarogya Dental Clinic`)}" style="display: inline-block; background-color: #0284c7; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 13px 22px; border-radius: 8px; margin-right: 8px; margin-bottom: 8px;">
+                      ✉️ Reply by Email
+                    </a>
+                    <a href="tel:${cleanPhone}" style="display: inline-block; background-color: #06163F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 13px 22px; border-radius: 8px; margin-bottom: 8px;">
+                      📞 Call Patient
                     </a>
                   </td>
                 </tr>
@@ -298,6 +317,7 @@ export async function POST(req: NextRequest) {
     const { error: resendError } = await resend.emails.send({
       from: senderEmail,
       to: recipientEmail,
+      replyTo: safeEmail,
       subject: `[New Appointment Request] ${safeName} - ${safeTreatment}`,
       html: htmlBody,
     });
