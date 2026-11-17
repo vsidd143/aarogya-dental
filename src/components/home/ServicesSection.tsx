@@ -294,16 +294,7 @@ export default function ServicesSection() {
                   className="w-full h-full object-cover filter saturate-[0.88]"
                 />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06163F] via-[#0B2A7A]/30 to-transparent pointer-events-none" />
-
-              <div className="absolute bottom-8 left-8 right-8 z-20">
-                <span className="text-[11px] font-mono tracking-widest uppercase text-cyan-300 block mb-2">
-                  01 · {services[0].subtitle}
-                </span>
-                <h3 className="font-serif italic text-4xl sm:text-5xl xl:text-6xl text-white font-normal tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
-                  {services[0].title}
-                </h3>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06163F]/80 via-transparent to-transparent pointer-events-none" />
             </div>
 
             {/* Slide 2: Restorative Dentistry */}
@@ -325,16 +316,7 @@ export default function ServicesSection() {
                   className="w-full h-full object-cover filter saturate-[0.88]"
                 />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06163F] via-[#0B2A7A]/30 to-transparent pointer-events-none" />
-
-              <div className="absolute bottom-8 left-8 right-8 z-20">
-                <span className="text-[11px] font-mono tracking-widest uppercase text-cyan-300 block mb-2">
-                  02 · {services[1].subtitle}
-                </span>
-                <h3 className="font-serif italic text-4xl sm:text-5xl xl:text-6xl text-white font-normal tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
-                  {services[1].title}
-                </h3>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06163F]/80 via-transparent to-transparent pointer-events-none" />
             </div>
 
             {/* Slide 3: Beyond the Smile */}
@@ -356,16 +338,7 @@ export default function ServicesSection() {
                   className="w-full h-full object-cover filter saturate-[0.88]"
                 />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06163F] via-[#0B2A7A]/30 to-transparent pointer-events-none" />
-
-              <div className="absolute bottom-8 left-8 right-8 z-20">
-                <span className="text-[11px] font-mono tracking-widest uppercase text-cyan-300 block mb-2">
-                  03 · {services[2].subtitle}
-                </span>
-                <h3 className="font-serif italic text-4xl sm:text-5xl xl:text-6xl text-white font-normal tracking-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
-                  {services[2].title}
-                </h3>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06163F]/80 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>
 
@@ -378,8 +351,13 @@ export default function ServicesSection() {
               ref={right1Ref}
               className="absolute inset-0 flex flex-col justify-center space-y-6 will-change-[transform,opacity]"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase w-fit">
-                OUR SOLUTIONS
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase w-fit">
+                  01 · {services[0].subtitle}
+                </div>
+                <h3 className="font-serif text-3xl sm:text-4xl xl:text-5xl text-white font-medium tracking-tight">
+                  {services[0].title}
+                </h3>
               </div>
 
               <p className="text-white/80 text-lg leading-relaxed max-w-lg font-sans">
@@ -440,8 +418,13 @@ export default function ServicesSection() {
               ref={right2Ref}
               className="absolute inset-0 flex flex-col justify-center space-y-6 will-change-[transform,opacity]"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase w-fit">
-                OUR SOLUTIONS
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase w-fit">
+                  02 · {services[1].subtitle}
+                </div>
+                <h3 className="font-serif text-3xl sm:text-4xl xl:text-5xl text-white font-medium tracking-tight">
+                  {services[1].title}
+                </h3>
               </div>
 
               <p className="text-white/80 text-lg leading-relaxed max-w-lg font-sans">
@@ -502,8 +485,13 @@ export default function ServicesSection() {
               ref={right3Ref}
               className="absolute inset-0 flex flex-col justify-center space-y-6 will-change-[transform,opacity]"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase w-fit">
-                OUR SOLUTIONS
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono tracking-widest uppercase w-fit">
+                  03 · {services[2].subtitle}
+                </div>
+                <h3 className="font-serif text-3xl sm:text-4xl xl:text-5xl text-white font-medium tracking-tight">
+                  {services[2].title}
+                </h3>
               </div>
 
               <p className="text-white/80 text-lg leading-relaxed max-w-lg font-sans">

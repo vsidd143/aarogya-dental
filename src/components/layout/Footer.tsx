@@ -51,7 +51,8 @@ export default function Footer() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to submit request.");
+        const detail = data.details ? `${data.error} (${data.details})` : data.error;
+        throw new Error(detail || "Failed to submit request.");
       }
 
       // Success: mark form submitted
@@ -59,7 +60,7 @@ export default function Footer() {
 
       // Independent WhatsApp launch: opens direct concierge chat without blocking email status
       try {
-        const cleanPhone = siteContent.contact.primaryPhone.replace(/\D/g, "");
+        const cleanPhone = (siteContent.contact.primaryWhatsapp || siteContent.contact.primaryPhone).replace(/\D/g, "");
         const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name}\n*Email:* ${formData.email}\n*Phone:* ${formData.phone}\n*Patient Address:* ${formData.address}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
         const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
         window.open(waLink, "_blank");
@@ -89,7 +90,7 @@ export default function Footer() {
   };
 
   const handleDirectWhatsAppFallback = () => {
-    const cleanPhone = siteContent.contact.primaryPhone.replace(/\D/g, "");
+    const cleanPhone = (siteContent.contact.primaryWhatsapp || siteContent.contact.primaryPhone).replace(/\D/g, "");
     const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name || "Patient"}\n*Email:* ${formData.email || "Not provided"}\n*Phone:* ${formData.phone || "Not provided"}\n*Patient Address:* ${formData.address || "Not provided"}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
     const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(waLink, "_blank");

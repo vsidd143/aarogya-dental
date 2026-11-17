@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     recentSubmissions.set(submissionHash, now);
 
     // 6. Verify Server Environment
-    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendApiKey = process.env.RESEND_API_KEY?.trim().replace(/^["']|["']$/g, "");
     if (!resendApiKey) {
       return NextResponse.json(
         { error: "Email notification service is temporarily unconfigured. Please connect directly via WhatsApp Concierge." },
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const recipientEmail = process.env.CONTACT_EMAIL;
+    const recipientEmail = process.env.CONTACT_EMAIL?.trim().replace(/^["']|["']$/g, "");
     if (!recipientEmail) {
       return NextResponse.json(
         { error: "Recipient clinic address is not configured. Please contact our front desk directly." },
@@ -146,7 +146,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Dynamic sender resolution: supports verified domain or Resend sandbox default
-    const senderEmail = process.env.RESEND_FROM_EMAIL || "Aarogya Dental Clinic <onboarding@resend.dev>";
+    const senderEmail =
+      process.env.RESEND_FROM_EMAIL?.trim().replace(/^["']|["']$/g, "") ||
+      "Aarogya Dental Clinic <onboarding@resend.dev>";
 
     // Format IST Timestamp
     const submissionDate = new Date().toLocaleString("en-IN", {
