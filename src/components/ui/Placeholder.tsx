@@ -76,7 +76,7 @@ export const Placeholder: React.FC<PlaceholderProps> = ({
           muted
           loop
           playsInline
-          className={`w-full h-full object-${objectFit}`}
+          className={`w-full h-full ${objectFit === "contain" ? "object-contain" : "object-cover"}`}
           onError={() => setVideoError(true)}
         />
       ) : null}
@@ -89,9 +89,9 @@ export const Placeholder: React.FC<PlaceholderProps> = ({
           fill={fill}
           priority={priority}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
-          className={`transition-opacity duration-700 object-${objectFit} ${
-            isLoaded ? "opacity-100" : "opacity-0"
-          }`}
+          className={`transition-opacity duration-700 ${
+            objectFit === "contain" ? "object-contain" : "object-cover"
+          } ${isLoaded ? "opacity-100" : "opacity-0"}`}
           onLoad={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
           unoptimized

@@ -94,7 +94,7 @@ export default function HeroSection() {
       tl.fromTo(
         slide3Ref.current,
         {
-          clipPath: "inset(0% 0% 100%)",
+          clipPath: "inset(0% 0% 100% 0%)",
           scale: 1.15,
         },
         {
@@ -246,7 +246,7 @@ export default function HeroSection() {
           <div
             ref={slide3Ref}
             className="hidden lg:block absolute inset-0 w-full h-full z-20"
-            style={{ clipPath: "inset(0% 0% 100%)" }}
+            style={{ clipPath: "inset(0% 0% 100% 0%)" }}
           >
             <Placeholder
               name="hero-3.jpg"
