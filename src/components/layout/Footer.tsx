@@ -16,6 +16,7 @@ import {
   ChevronDown,
   AlertCircle,
   Loader2,
+  Send,
 } from "lucide-react";
 
 export default function Footer() {
@@ -25,6 +26,7 @@ export default function Footer() {
     phone: "",
     address: "",
     treatment: "Smile Makeover / Porcelain Veneers",
+    preferredTime: "Morning (10:00 AM – 1:00 PM)",
     message: "",
     website_trap: "", // Honeypot field for bot protection
   });
@@ -55,18 +57,8 @@ export default function Footer() {
         throw new Error(detail || "Failed to submit request.");
       }
 
-      // Success: mark form submitted
+      // Success: mark form submitted (do not auto-launch WhatsApp)
       setSubmitted(true);
-
-      // Independent WhatsApp launch: opens direct concierge chat without blocking email status
-      try {
-        const cleanPhone = (siteContent.contact.primaryWhatsapp || siteContent.contact.primaryPhone).replace(/\D/g, "");
-        const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name}\n*Email:* ${formData.email}\n*Phone:* ${formData.phone}\n*Patient Address:* ${formData.address}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
-        const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-        window.open(waLink, "_blank");
-      } catch {
-        // Non-blocking if popups are suppressed
-      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
       setErrorMessage(msg);
@@ -84,6 +76,7 @@ export default function Footer() {
       phone: "",
       address: "",
       treatment: "Smile Makeover / Porcelain Veneers",
+      preferredTime: "Morning (10:00 AM – 1:00 PM)",
       message: "",
       website_trap: "",
     });
@@ -91,7 +84,7 @@ export default function Footer() {
 
   const handleDirectWhatsAppFallback = () => {
     const cleanPhone = (siteContent.contact.primaryWhatsapp || siteContent.contact.primaryPhone).replace(/\D/g, "");
-    const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name || "Patient"}\n*Email:* ${formData.email || "Not provided"}\n*Phone:* ${formData.phone || "Not provided"}\n*Patient Address:* ${formData.address || "Not provided"}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Notes:* ${formData.message || "None"}`;
+    const msg = `*Appointment Request - Aarogya Dental Clinic*\n\n*Name:* ${formData.name || "Patient"}\n*Email:* ${formData.email || "Not provided"}\n*Phone:* ${formData.phone || "Not provided"}\n*Patient Address:* ${formData.address || "Not provided"}\n*Clinic:* ${currentBranch.name} (${currentBranch.city})\n*Treatment of Interest:* ${formData.treatment}\n*Preferred Timing:* ${formData.preferredTime}\n*Notes:* ${formData.message || "None"}`;
     const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(waLink, "_blank");
   };
@@ -178,7 +171,8 @@ export default function Footer() {
                     </div>
                     <p className="text-sm text-white/75 max-w-md mx-auto leading-relaxed">
                       Thank you, <span className="text-white font-semibold">{formData.name}</span>. An email notification has been delivered directly to our desk for{" "}
-                      <span className="text-cyan-300 font-semibold">{currentBranch.name}</span> ({currentBranch.city}). Our clinical coordinator is connecting with you on WhatsApp right away.
+                      <span className="text-cyan-300 font-semibold">{currentBranch.name}</span> ({currentBranch.city}) for{" "}
+                      <span className="text-cyan-300 font-semibold">{formData.preferredTime}</span>. Our clinical coordinator is connecting with you on WhatsApp right away.
                     </p>
                     <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
                       <button
@@ -346,65 +340,122 @@ export default function Footer() {
                       </div>
                     </div>
 
-                    {/* Treatment Category */}
-                    <div className="space-y-1.5">
-                      <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
-                        Treatment Interest
-                      </label>
-                      <div className="relative flex items-center">
-                        <select
-                          value={formData.treatment}
-                          disabled={isSubmitting}
-                          onChange={(e) =>
-                            setFormData({ ...formData, treatment: e.target.value })
-                          }
-                          className="w-full px-4 pr-10 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all appearance-none cursor-pointer disabled:opacity-50"
-                        >
-                          <option
-                            value="Smile Makeover / Porcelain Veneers"
-                            className="bg-[#05112E] text-white"
+                    {/* Row 3: Treatment Category & Preferred Time Slot */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Treatment Category */}
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
+                          Treatment Interest
+                        </label>
+                        <div className="relative flex items-center">
+                          <select
+                            value={formData.treatment}
+                            disabled={isSubmitting}
+                            onChange={(e) =>
+                              setFormData({ ...formData, treatment: e.target.value })
+                            }
+                            className="w-full px-4 pr-10 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all appearance-none cursor-pointer disabled:opacity-50"
                           >
-                            Esthetic: Smile Makeover & Porcelain Veneers
-                          </option>
-                          <option
-                            value="Guided Dental Implants"
-                            className="bg-[#05112E] text-white"
+                            <option
+                              value="Smile Makeover / Porcelain Veneers"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Esthetic: Smile Makeover & Porcelain Veneers
+                            </option>
+                            <option
+                              value="Guided Dental Implants"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Restorative: Guided Dental Implants
+                            </option>
+                            <option
+                              value="CAD/CAM Same-Day Crowns"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Restorative: CAD/CAM Same-Day Crowns
+                            </option>
+                            <option
+                              value="Invisible Clear Aligners"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Orthodontics: Invisible Clear Aligners
+                            </option>
+                            <option
+                              value="Microscopic Root Canal Therapy"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Endodontics: Microscopic Root Canal
+                            </option>
+                            <option
+                              value="Comprehensive Dental Checkup & Cleaning"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Preventive: Comprehensive Dental Checkup & Laser Cleaning
+                            </option>
+                            <option
+                              value="Emergency Urgent Dental Relief"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Urgent Relief: Same-Day Emergency Slot
+                            </option>
+                          </select>
+                          <div className="absolute right-4 text-white/40 pointer-events-none">
+                            <ChevronDown className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Preferred Time Slot */}
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
+                          Preferred Time Slot
+                        </label>
+                        <div className="relative flex items-center">
+                          <div className="absolute left-4 text-cyan-300/70 pointer-events-none">
+                            <Clock className="w-4 h-4" />
+                          </div>
+                          <select
+                            value={formData.preferredTime}
+                            disabled={isSubmitting}
+                            onChange={(e) =>
+                              setFormData({ ...formData, preferredTime: e.target.value })
+                            }
+                            className="w-full pl-11 pr-10 py-3 rounded-xl bg-slate-950/60 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-slate-950/90 transition-all appearance-none cursor-pointer disabled:opacity-50"
                           >
-                            Restorative: Guided Dental Implants
-                          </option>
-                          <option
-                            value="CAD/CAM Same-Day Crowns"
-                            className="bg-[#05112E] text-white"
-                          >
-                            Restorative: CAD/CAM Same-Day Crowns
-                          </option>
-                          <option
-                            value="Invisible Clear Aligners"
-                            className="bg-[#05112E] text-white"
-                          >
-                            Orthodontics: Invisible Clear Aligners
-                          </option>
-                          <option
-                            value="Microscopic Root Canal Therapy"
-                            className="bg-[#05112E] text-white"
-                          >
-                            Endodontics: Microscopic Root Canal
-                          </option>
-                          <option
-                            value="Comprehensive Dental Checkup & Cleaning"
-                            className="bg-[#05112E] text-white"
-                          >
-                            Preventive: Comprehensive Dental Checkup & Laser Cleaning
-                          </option>
-                          <option
-                            value="Emergency Urgent Dental Relief"
-                            className="bg-[#05112E] text-white"
-                          >
-                            Urgent Relief: Same-Day Emergency Slot
-                          </option>
-                        </select>
-                        <div className="absolute right-4 text-white/40 pointer-events-none">
-                          <ChevronDown className="w-4 h-4" />
+                            <option
+                              value="Morning (10:00 AM – 1:00 PM)"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Morning (10:00 AM – 1:00 PM)
+                            </option>
+                            <option
+                              value="Afternoon (1:00 PM – 4:00 PM)"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Afternoon (1:00 PM – 4:00 PM)
+                            </option>
+                            <option
+                              value="Evening (4:00 PM – 7:00 PM)"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Evening (4:00 PM – 7:00 PM)
+                            </option>
+                            <option
+                              value="Late Evening (7:00 PM – 8:00 PM)"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Late Evening (7:00 PM – 8:00 PM)
+                            </option>
+                            <option
+                              value="Earliest Available Slot"
+                              className="bg-[#05112E] text-white"
+                            >
+                              Any Time / Earliest Available
+                            </option>
+                          </select>
+                          <div className="absolute right-4 text-white/40 pointer-events-none">
+                            <ChevronDown className="w-4 h-4" />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -412,7 +463,7 @@ export default function Footer() {
                     {/* Message / Special Requests */}
                     <div className="space-y-1.5">
                       <label className="block text-[11px] font-mono uppercase tracking-[0.18em] text-white/75">
-                        Special Requests / Preferred Timing{" "}
+                        Special Requests / Clinical Concerns{" "}
                         <span className="text-white/40 font-normal lowercase">
                           (optional)
                         </span>
@@ -420,7 +471,7 @@ export default function Footer() {
                       <textarea
                         rows={2}
                         disabled={isSubmitting}
-                        placeholder="e.g. Prefer afternoon slot after 3 PM. Concerned about front tooth gap."
+                        placeholder="e.g. Concerned about front tooth gap, prefer Dr. on Saturday."
                         value={formData.message}
                         onChange={(e) =>
                           setFormData({ ...formData, message: e.target.value })
@@ -429,25 +480,39 @@ export default function Footer() {
                       />
                     </div>
 
-                    {/* Submit Button & Assurance */}
-                    <div className="pt-2 flex flex-col sm:flex-row sm:items-center gap-4">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="relative group overflow-hidden rounded-full py-3.5 px-8 bg-gradient-to-r from-cyan-400 via-cyan-300 to-[#12A4DB] text-slate-950 font-semibold text-sm tracking-wide shadow-[0_10px_35px_rgba(18,164,219,0.35)] hover:shadow-[0_12px_45px_rgba(18,164,219,0.55)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer w-full sm:w-auto disabled:opacity-75 disabled:pointer-events-none"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                            <span>Confirming with Desk...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Connect via WhatsApp Concierge</span>
-                            <MessageCircle className="w-4 h-4 text-slate-950 group-hover:scale-110 transition-transform" />
-                          </>
-                        )}
-                      </button>
+                    {/* Submit & WhatsApp Action Buttons */}
+                    <div className="pt-2 space-y-3">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+                        {/* Primary Button: Submit Appointment Request */}
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="relative group overflow-hidden rounded-full py-3.5 px-7 bg-gradient-to-r from-cyan-400 via-cyan-300 to-[#12A4DB] text-slate-950 font-semibold text-sm tracking-wide shadow-[0_10px_35px_rgba(18,164,219,0.35)] hover:shadow-[0_12px_45px_rgba(18,164,219,0.55)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer w-full sm:w-auto disabled:opacity-75 disabled:pointer-events-none"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                              <span>Submitting Request...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Submit Appointment Request</span>
+                              <Send className="w-4 h-4 text-slate-950 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                            </>
+                          )}
+                        </button>
+
+                        {/* Secondary Button: Connect via WhatsApp Concierge */}
+                        <button
+                          type="button"
+                          disabled={isSubmitting}
+                          onClick={handleDirectWhatsAppFallback}
+                          className="relative group overflow-hidden rounded-full py-3.5 px-6 bg-white/[0.05] hover:bg-white/[0.1] border border-[#25D366]/40 hover:border-[#25D366] text-white font-medium text-sm tracking-wide shadow-[0_4px_20px_rgba(37,211,102,0.15)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.25)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer w-full sm:w-auto disabled:opacity-50 disabled:pointer-events-none"
+                        >
+                          <MessageCircle className="w-4 h-4 text-[#25D366] group-hover:scale-110 transition-transform" />
+                          <span>Connect via WhatsApp Concierge</span>
+                        </button>
+                      </div>
 
                       <div className="flex items-center gap-2 text-xs text-white/50">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />

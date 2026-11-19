@@ -1,18 +1,24 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-// In-memory rate limiting & duplicate submission tracker (per serverless instance)
-const rateLimitMap = new Map<string, { count: number; firstRequestTime: number }>();
+// In-memory rate limiting & duplicate submission tracker
+const rateLimitMap = new Map<
+  string,
+  { count: number; firstRequestTime: number }
+>();
 const recentSubmissions = new Map<string, number>();
 
-// Clean up stale rate-limit entries every 15 minutes
+// Clean up stale entries every 15 minutes
 setInterval(() => {
   const now = Date.now();
+
   for (const [key, val] of rateLimitMap.entries()) {
     if (now - val.firstRequestTime > 15 * 60 * 1000) {
       rateLimitMap.delete(key);
     }
   }
+
   for (const [hash, time] of recentSubmissions.entries()) {
     if (now - time > 5 * 60 * 1000) {
       recentSubmissions.delete(hash);
@@ -20,7 +26,7 @@ setInterval(() => {
   }
 }, 15 * 60 * 1000);
 
-// HTML sanitizer to prevent injection into notification emails
+// HTML sanitizer
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -34,56 +40,105 @@ export async function POST(req: NextRequest) {
   try {
     // 1. IP extraction & Rate Limiting
     const forwardedFor = req.headers.get("x-forwarded-for");
-    const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : "anonymous-client";
+    const ip = forwardedFor
+      ? forwardedFor.split(",")[0].trim()
+      : "anonymous-client";
 
     const now = Date.now();
-    const windowMs = 10 * 60 * 1000; // 10 minutes
+    const windowMs = 10 * 60 * 1000;
     const maxRequests = 5;
 
     const rateEntry = rateLimitMap.get(ip);
+
     if (rateEntry) {
       if (now - rateEntry.firstRequestTime < windowMs) {
         if (rateEntry.count >= maxRequests) {
           return NextResponse.json(
-            { error: "Too many reservation requests. Please call our clinic directly or try again in a few minutes." },
+            {
+              error:
+                "Too many reservation requests. Please call our clinic directly or try again in a few minutes.",
+            },
             { status: 429 }
           );
         }
+
         rateEntry.count++;
       } else {
-        rateLimitMap.set(ip, { count: 1, firstRequestTime: now });
+        rateLimitMap.set(ip, {
+          count: 1,
+          firstRequestTime: now,
+        });
       }
     } else {
-      rateLimitMap.set(ip, { count: 1, firstRequestTime: now });
+      rateLimitMap.set(ip, {
+        count: 1,
+        firstRequestTime: now,
+      });
     }
 
     // 2. Body parsing
     let body;
+
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json({ error: "Invalid JSON request body." }, { status: 400 });
-    }
-
-    const { name, email, phone, address, treatment, message, website_trap } = body;
-
-    // 3. Honeypot check (Spam bot detection)
-    if (website_trap && typeof website_trap === "string" && website_trap.trim() !== "") {
-      // Silently accept without sending email to thwart bot harvesters
-      return NextResponse.json({ success: true, message: "Enquiry received." }, { status: 200 });
-    }
-
-    // 4. Input validation
-    if (!name || typeof name !== "string" || name.trim().length < 2 || name.trim().length > 100) {
       return NextResponse.json(
-        { error: "Please provide a valid full name (2-100 characters)." },
+        { error: "Invalid JSON request body." },
         { status: 400 }
       );
     }
 
-    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().length > 150) {
+    const {
+      name,
+      email,
+      phone,
+      address,
+      treatment,
+      preferredTime,
+      time,
+      message,
+      website_trap,
+    } = body;
+
+    // 3. Honeypot spam protection
+    if (
+      website_trap &&
+      typeof website_trap === "string" &&
+      website_trap.trim() !== ""
+    ) {
       return NextResponse.json(
-        { error: "Please provide a valid email address (e.g. name@example.com)." },
+        { success: true, message: "Enquiry received." },
+        { status: 200 }
+      );
+    }
+
+    // 4. Input validation
+    if (
+      !name ||
+      typeof name !== "string" ||
+      name.trim().length < 2 ||
+      name.trim().length > 100
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Please provide a valid full name (2-100 characters).",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      !email ||
+      typeof email !== "string" ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ||
+      email.trim().length > 150
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Please provide a valid email address (e.g. name@example.com).",
+        },
         { status: 400 }
       );
     }
@@ -96,16 +151,28 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanPhone = phone.replace(/[^0-9+]/g, "");
+
     if (cleanPhone.length < 7 || cleanPhone.length > 16) {
       return NextResponse.json(
-        { error: "Please enter a valid phone or WhatsApp number (7-15 digits)." },
+        {
+          error:
+            "Please enter a valid phone or WhatsApp number (7-15 digits).",
+        },
         { status: 400 }
       );
     }
 
-    if (!address || typeof address !== "string" || address.trim().length < 2 || address.trim().length > 200) {
+    if (
+      !address ||
+      typeof address !== "string" ||
+      address.trim().length < 2 ||
+      address.trim().length > 200
+    ) {
       return NextResponse.json(
-        { error: "Please provide your residential or preferred location (2-200 characters)." },
+        {
+          error:
+            "Please provide your residential or preferred location (2-200 characters).",
+        },
         { status: 400 }
       );
     }
@@ -114,40 +181,82 @@ export async function POST(req: NextRequest) {
     const safeEmail = escapeHtml(email.trim());
     const safePhone = escapeHtml(phone.trim());
     const safeAddress = escapeHtml(address.trim());
-    const safeTreatment = escapeHtml(typeof treatment === "string" && treatment.trim() ? treatment.trim() : "General Consultation & Evaluation");
-    const safeMessage = typeof message === "string" ? escapeHtml(message.trim().slice(0, 2000)) : "";
 
-    // 5. Duplicate Submission Prevention (60s window)
+    const treatmentValue =
+      typeof treatment === "string" && treatment.trim()
+        ? treatment.trim()
+        : "General Consultation & Evaluation";
+
+    const safeTreatment = escapeHtml(treatmentValue);
+
+    const timeValue =
+      typeof preferredTime === "string" && preferredTime.trim()
+        ? preferredTime.trim()
+        : typeof time === "string" && time.trim()
+        ? time.trim()
+        : "Morning (10:00 AM – 1:00 PM)";
+
+    const safeTime = escapeHtml(timeValue);
+
+    const safeMessage =
+      typeof message === "string"
+        ? escapeHtml(message.trim().slice(0, 2000))
+        : "";
+
+    // 5. Duplicate Submission Prevention
     const submissionHash = `${safeName.toLowerCase()}_${safeEmail.toLowerCase()}_${cleanPhone}_${safeTreatment.toLowerCase()}`;
-    const previousSubmissionTime = recentSubmissions.get(submissionHash);
-    if (previousSubmissionTime && now - previousSubmissionTime < 60 * 1000) {
+
+    const previousSubmissionTime =
+      recentSubmissions.get(submissionHash);
+
+    if (
+      previousSubmissionTime &&
+      now - previousSubmissionTime < 60 * 1000
+    ) {
       return NextResponse.json(
-        { error: "A reservation request with these details was just submitted. Our team will contact you shortly." },
+        {
+          error:
+            "A reservation request with these details was just submitted. Our team will contact you shortly.",
+        },
         { status: 429 }
       );
     }
+
     recentSubmissions.set(submissionHash, now);
 
-    // 6. Verify Server Environment
-    const resendApiKey = process.env.RESEND_API_KEY?.trim().replace(/^["']|["']$/g, "");
+    // 6. Verify Resend environment variables
+    const resendApiKey = process.env.RESEND_API_KEY
+      ?.trim()
+      .replace(/^["']|["']$/g, "");
+
     if (!resendApiKey) {
       return NextResponse.json(
-        { error: "Email notification service is temporarily unconfigured. Please connect directly via WhatsApp Concierge." },
+        {
+          error:
+            "Email notification service is temporarily unconfigured. Please connect directly via WhatsApp Concierge.",
+        },
         { status: 500 }
       );
     }
 
-    const recipientEmail = process.env.CONTACT_EMAIL?.trim().replace(/^["']|["']$/g, "");
+    const recipientEmail = process.env.CONTACT_EMAIL
+      ?.trim()
+      .replace(/^["']|["']$/g, "");
+
     if (!recipientEmail) {
       return NextResponse.json(
-        { error: "Recipient clinic address is not configured. Please contact our front desk directly." },
+        {
+          error:
+            "Recipient clinic address is not configured. Please contact our front desk directly.",
+        },
         { status: 500 }
       );
     }
 
-    // Dynamic sender resolution: supports verified domain or Resend sandbox default
     const senderEmail =
-      process.env.RESEND_FROM_EMAIL?.trim().replace(/^["']|["']$/g, "") ||
+      process.env.RESEND_FROM_EMAIL
+        ?.trim()
+        .replace(/^["']|["']$/g, "") ||
       "Aarogya Dental Clinic <onboarding@resend.dev>";
 
     // Format IST Timestamp
@@ -157,10 +266,57 @@ export async function POST(req: NextRequest) {
       timeStyle: "medium",
     });
 
-    // 7. Compose HTML Email
+    // 7. n8n Integration (Failure-isolated)
+    // n8n failure will NOT stop the Resend email notification.
+    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL?.trim();
+
+    if (n8nWebhookUrl) {
+      try {
+        const n8nResponse = await fetch(n8nWebhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
+            address: address.trim(),
+            service: treatmentValue,
+            preferredTime: timeValue,
+            message:
+              typeof message === "string"
+                ? message.trim().slice(0, 2000)
+                : "",
+            submittedAt: new Date().toISOString(),
+            status: "New",
+          }),
+          signal: AbortSignal.timeout(5000),
+        });
+
+        if (!n8nResponse.ok) {
+          console.error(
+            "n8n webhook failed:",
+            n8nResponse.status,
+            n8nResponse.statusText
+          );
+        }
+      } catch (n8nError) {
+        console.error("n8n integration error:", n8nError);
+      }
+    } else {
+      console.warn(
+        "N8N_WEBHOOK_URL is not configured. Skipping n8n integration."
+      );
+    }
+
+    // 8. Compose HTML Email
     const resend = new Resend(resendApiKey);
 
-    const whatsappDirectLink = `https://wa.me/${cleanPhone.replace("+", "")}?text=${encodeURIComponent(
+    const whatsappDirectLink = `https://wa.me/${cleanPhone.replace(
+      "+",
+      ""
+    )}?text=${encodeURIComponent(
       `Hello ${safeName}, thank you for reaching out to Aarogya Dental Clinic regarding ${safeTreatment}. We would be delighted to assist you with your appointment.`
     )}`;
 
@@ -177,8 +333,7 @@ export async function POST(req: NextRequest) {
     <tr>
       <td align="center">
         <table role="presentation" width="100%" style="max-width: 620px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(6, 22, 63, 0.08); border: 1px solid #e2e8f0;">
-          
-          <!-- Header -->
+
           <tr>
             <td style="background-color: #06163F; padding: 36px 32px; text-align: left; border-bottom: 3px solid #00C2CB;">
               <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: #00C2CB; margin-bottom: 8px;">
@@ -193,7 +348,6 @@ export async function POST(req: NextRequest) {
             </td>
           </tr>
 
-          <!-- Summary Alert Banner -->
           <tr>
             <td style="padding: 24px 32px 0 32px;">
               <div style="background-color: #ecfeff; border: 1px solid #a5f3fc; border-radius: 10px; padding: 14px 18px; color: #0e7490; font-size: 14px; line-height: 1.5;">
@@ -202,7 +356,6 @@ export async function POST(req: NextRequest) {
             </td>
           </tr>
 
-          <!-- Patient Details Table -->
           <tr>
             <td style="padding: 24px 32px;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
@@ -212,72 +365,50 @@ export async function POST(req: NextRequest) {
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b; width: 35%;">
-                    Patient Name
-                  </td>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #06163F;">
-                    ${safeName}
-                  </td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b; width: 35%;">Patient Name</td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #06163F;">${safeName}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">
-                    Email Address
-                  </td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">Email Address</td>
                   <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #06163F;">
                     <a href="mailto:${safeEmail}" style="color: #0284c7; text-decoration: none;">${safeEmail}</a>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">
-                    Phone / WhatsApp
-                  </td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">Phone / WhatsApp</td>
                   <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #06163F;">
                     <a href="tel:${cleanPhone}" style="color: #0284c7; text-decoration: none;">${safePhone}</a>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">
-                    Patient Location / Area
-                  </td>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #06163F;">
-                    ${safeAddress}
-                  </td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">Patient Location / Area</td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #06163F;">${safeAddress}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">
-                    Treatment Interest
-                  </td>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #0e7490;">
-                    ${safeTreatment}
-                  </td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">Treatment Interest</td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #0e7490;">${safeTreatment}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">
-                    Submitted On (IST)
-                  </td>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569;">
-                    ${submissionDate}
-                  </td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">Preferred Timing</td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; font-weight: 600; color: #0284c7;">${safeTime}</td>
                 </tr>
-                ${
-                  safeMessage
-                    ? `
                 <tr>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b; vertical-align: top;">
-                    Special Notes
-                  </td>
-                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #334155; line-height: 1.6;">
-                    ${safeMessage}
-                  </td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b;">Submitted On (IST)</td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569;">${submissionDate}</td>
+                </tr>
+                ${safeMessage
+        ? `
+                <tr>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #64748b; vertical-align: top;">Special Notes</td>
+                  <td style="padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #334155; line-height: 1.6;">${safeMessage}</td>
                 </tr>
                 `
-                    : ""
-                }
+        : ""
+      }
               </table>
             </td>
           </tr>
 
-          <!-- Quick Actions -->
           <tr>
             <td style="padding: 0 32px 32px 32px;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
@@ -286,7 +417,9 @@ export async function POST(req: NextRequest) {
                     <a href="${whatsappDirectLink}" target="_blank" style="display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 13px 22px; border-radius: 8px; margin-right: 8px; margin-bottom: 8px;">
                       💬 Open WhatsApp Conversation
                     </a>
-                    <a href="mailto:${safeEmail}?subject=${encodeURIComponent(`Appointment Confirmation - Aarogya Dental Clinic`)}" style="display: inline-block; background-color: #0284c7; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 13px 22px; border-radius: 8px; margin-right: 8px; margin-bottom: 8px;">
+                    <a href="mailto:${safeEmail}?subject=${encodeURIComponent(
+        "Appointment Confirmation - Aarogya Dental Clinic"
+      )}" style="display: inline-block; background-color: #0284c7; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 13px 22px; border-radius: 8px; margin-right: 8px; margin-bottom: 8px;">
                       ✉️ Reply by Email
                     </a>
                     <a href="tel:${cleanPhone}" style="display: inline-block; background-color: #06163F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 13px 22px; border-radius: 8px; margin-bottom: 8px;">
@@ -298,7 +431,6 @@ export async function POST(req: NextRequest) {
             </td>
           </tr>
 
-          <!-- Footer -->
           <tr>
             <td style="background-color: #f8fafc; padding: 20px 32px; border-top: 1px solid #e2e8f0; text-align: center;">
               <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5;">
@@ -316,6 +448,7 @@ export async function POST(req: NextRequest) {
 </html>
     `;
 
+    // 9. Send Resend Email
     const { error: resendError } = await resend.emails.send({
       from: senderEmail,
       to: recipientEmail,
@@ -325,25 +458,35 @@ export async function POST(req: NextRequest) {
     });
 
     if (resendError) {
+      console.error("Resend email error:", resendError);
+
       return NextResponse.json(
         {
-          error: "Failed to deliver email notification. Our team has recorded your details — you can also reach us directly via WhatsApp.",
+          error:
+            "Failed to deliver email notification. Our team has recorded your details — you can also reach us directly via WhatsApp.",
           details: resendError.message,
         },
         { status: 502 }
       );
     }
 
+    // 10. Success response
     return NextResponse.json(
       {
         success: true,
-        message: "Your appointment request has been submitted successfully. Our clinical coordinator will contact you shortly.",
+        message:
+          "Your appointment request has been submitted successfully. Our clinical coordinator will contact you shortly.",
       },
       { status: 200 }
     );
-  } catch {
+  } catch (error) {
+    console.error("Contact API error:", error);
+
     return NextResponse.json(
-      { error: "An unexpected error occurred while processing your request. Please try again or chat with us on WhatsApp." },
+      {
+        error:
+          "An unexpected error occurred while processing your request. Please try again or chat with us on WhatsApp.",
+      },
       { status: 500 }
     );
   }
